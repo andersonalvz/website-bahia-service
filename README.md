@@ -58,8 +58,30 @@ public/images/        # Logo, hero e imagens dos serviços
 
 Ferramenta interna no navegador (sem login/banco) para montar propostas comerciais com preview em tempo real e geração de PDF via impressão A4.
 
+## Exportação estática
+
+O projeto está configurado com `output: 'export'` no Next.js. O build gera arquivos estáticos em `out/`, prontos para qualquer hospedagem (Nginx, Apache, CDN, site institucional, etc.), sem servidor Node.
+
+```bash
+npm run build
+```
+
+Os arquivos ficam em `out/`. Para pré-visualizar localmente:
+
+```bash
+npm start
+```
+
+### Compatibilidade
+
+- Sem Server Actions, Route Handlers, middleware, cookies/headers ou SSR dinâmico
+- Imagens via `next/image` com `images.unoptimized: true` (necessário na exportação estática)
+- Formulário de contato e gerador de propostas funcionam 100% no navegador
+
 ## Deploy
 
 Configure o projeto apontando para este repositório:
 
 `https://github.com/andersonalvz/website-bahia-service`
+
+Publique o conteúdo da pasta `out/` no servidor ou CDN do site institucional.
