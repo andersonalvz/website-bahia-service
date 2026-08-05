@@ -1,0 +1,168 @@
+/* Estilos exclusivos de impressão / Gerar PDF via navegador */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm 12mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .no-print,
+  header.app-chrome,
+  footer.app-chrome,
+  nav,
+  button {
+    display: none !important;
+  }
+
+  .proposal-layout {
+    display: block !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+  }
+
+  .proposal-preview-shell {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .proposal-document {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  /* Página 1: cabeçalho + resumo + clientes */
+  .proposal-header,
+  .proposal-summary {
+    break-inside: avoid;
+    break-after: avoid;
+  }
+
+  .proposal-clients {
+    break-inside: avoid;
+    break-after: always;
+    page-break-after: always;
+    margin-bottom: 0 !important;
+  }
+
+  .clients-logos-frame {
+    padding: 6px !important;
+  }
+
+  .clients-logos-frame > div {
+    height: 150mm !important;
+    max-width: 100% !important;
+  }
+
+  /* Página 2: descrição do serviço */
+  .proposal-service {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Página 3+: tabela financeira + condições comerciais
+     (espaço livre para crescer com mais serviços) */
+  .proposal-finance-page {
+    break-before: always;
+    page-break-before: always;
+    break-inside: auto;
+    page-break-inside: auto;
+    margin: 0 !important;
+  }
+
+  .proposal-table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 16px !important;
+  }
+
+  .proposal-conditions {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .proposal-conditions ol {
+    margin-top: 8px !important;
+  }
+
+  .proposal-conditions li {
+    font-size: 11.5px !important;
+    line-height: 1.4 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Página final exclusiva: SLA + contato */
+  .proposal-sla-page {
+    break-before: always;
+    page-break-before: always;
+    break-inside: auto;
+    page-break-inside: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .proposal-sla {
+    break-inside: auto;
+    page-break-inside: auto;
+    padding: 12px 14px !important;
+  }
+
+  .sla-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding: 8px 10px !important;
+  }
+
+  .proposal-sla .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 8px !important;
+  }
+
+  .proposal-sla p,
+  .sla-item p {
+    font-size: 11.5px !important;
+    line-height: 1.4 !important;
+  }
+
+  .proposal-contact {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-before: avoid;
+    page-break-before: avoid;
+    margin-top: 14px !important;
+    padding: 12px 14px !important;
+  }
+
+  .proposal-contact .contact-details {
+    margin-top: 8px !important;
+    display: grid !important;
+    gap: 3px !important;
+    font-size: 11.5px !important;
+    line-height: 1.4 !important;
+  }
+
+  .proposal-document > *:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+}

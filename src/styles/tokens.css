@@ -1,0 +1,17 @@
+/**
+ * Design token reference (mirrored in globals.css :root and constants/tokens.ts).
+ * Prefer Tailwind theme tokens (bs-primary, etc.) in components.
+ */
+:root {
+  --bs-primary: #1b365d;
+  --bs-secondary: #3d85c6;
+  --bs-accent: #5ba3d9;
+  --bs-muted: #64748b;
+  --bs-surface: #f8fafc;
+  --bs-border: #e2e8f0;
+  --bs-shadow-card: 0 10px 40px rgba(27, 54, 93, 0.06);
+  --bs-shadow-elevated: 0 16px 50px rgba(27, 54, 93, 0.08);
+  --bs-radius-card: 1.5rem;
+  --bs-radius-button: 1rem;
+  --bs-transition: 150ms ease;
+}

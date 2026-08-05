@@ -1,0 +1,102 @@
+@import "tailwindcss";
+@import "./print.css";
+@import "../styles/tokens.css";
+
+:root {
+  --background: #f4f7fb;
+  --foreground: #0f172a;
+  --bs-primary: #1b365d;
+  --bs-secondary: #3d85c6;
+  --bs-accent: #5ba3d9;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-bs-primary: var(--bs-primary);
+  --color-bs-secondary: var(--bs-secondary);
+  --color-bs-accent: var(--bs-accent);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-sora);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(61, 133, 198, 0.14), transparent 55%),
+    radial-gradient(900px 400px at 90% 0%, rgba(27, 54, 93, 0.08), transparent 50%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-manrope), "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: var(--font-sora), var(--font-manrope), sans-serif;
+}
+
+.field-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.field-input:focus {
+  border-color: var(--bs-secondary);
+  box-shadow: 0 0 0 3px rgba(61, 133, 198, 0.18);
+}
+
+::selection {
+  background: rgba(61, 133, 198, 0.22);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 500ms ease both;
+}
+
+.animate-fade-up-delay-1 {
+  animation: fade-up 500ms ease 80ms both;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fade-up 500ms ease 160ms both;
+}
+
+.animate-fade-up-delay-3 {
+  animation: fade-up 500ms ease 240ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-up-delay-1,
+  .animate-fade-up-delay-2,
+  .animate-fade-up-delay-3 {
+    animation: none;
+  }
+}

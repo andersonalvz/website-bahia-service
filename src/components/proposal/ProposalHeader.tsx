@@ -1,0 +1,68 @@
+import Image from "next/image";
+import { BRAND } from "@/constants/brand";
+import { formatDisplayDate } from "@/lib/dates";
+
+interface ProposalHeaderProps {
+  companyName: string;
+  contactName: string;
+  city: string;
+  date: string;
+}
+
+export function ProposalHeader({
+  companyName,
+  contactName,
+  city,
+  date,
+}: ProposalHeaderProps) {
+  return (
+    <header className="proposal-header border-b border-slate-200 pb-6">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-4">
+          <Image
+            src={BRAND.logo}
+            alt={BRAND.name}
+            width={180}
+            height={56}
+            className="h-14 w-auto object-contain"
+            priority
+          />
+        </div>
+
+        <div className="text-left sm:text-right">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-bs-secondary">
+            Documento comercial
+          </p>
+          <h1 className="mt-1 font-display text-2xl font-bold tracking-tight text-bs-primary sm:text-3xl">
+            Proposta Comercial
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">{BRAND.tagline}</p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            Cliente
+          </p>
+          <p className="mt-1 text-base font-semibold text-bs-primary">
+            {companyName || "Nome da empresa"}
+          </p>
+          <p className="text-sm text-slate-600">
+            {contactName || "Responsável"}
+            {city ? ` · ${city}` : ""}
+          </p>
+        </div>
+        <div className="sm:text-right">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            Data
+          </p>
+          <p className="mt-1 text-base font-semibold text-bs-primary">
+            {formatDisplayDate(date)}
+          </p>
+          <p className="text-sm text-slate-600">{BRAND.contact.cityLabel}</p>
+        </div>
+      </div>
+    </header>
+  );
+}
