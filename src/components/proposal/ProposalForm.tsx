@@ -136,7 +136,7 @@ export function ProposalForm({
               <button
                 type="button"
                 onClick={addServiceLine}
-                className="rounded-full bg-bs-primary/5 px-3 py-1.5 text-xs font-semibold text-bs-primary transition hover:bg-bs-primary/10"
+                className="inline-flex min-h-10 items-center rounded-full bg-bs-primary/5 px-3 py-2 text-xs font-semibold text-bs-primary transition hover:bg-bs-primary/10"
               >
                 + Adicionar serviço
               </button>
@@ -157,7 +157,7 @@ export function ProposalForm({
                       <button
                         type="button"
                         onClick={() => removeServiceLine(line.id)}
-                        className="text-xs font-medium text-red-600 hover:text-red-700"
+                        className="inline-flex min-h-10 items-center px-2 text-xs font-medium text-red-600 hover:text-red-700"
                       >
                         Remover
                       </button>

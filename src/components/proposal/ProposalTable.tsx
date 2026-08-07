@@ -24,8 +24,8 @@ export function ProposalTable({
         Valores estimados com base nos parâmetros informados nesta proposta.
       </p>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
-        <table className="w-full text-sm">
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
+        <table className="w-full min-w-[300px] text-sm sm:min-w-0">
           <thead>
             <tr className="bg-bs-primary text-left text-white">
               <th className="px-3 py-3 font-medium sm:px-4">Serviço</th>
@@ -33,7 +33,9 @@ export function ProposalTable({
               <th className="hidden px-2 py-3 text-right font-medium sm:table-cell">
                 Unitário
               </th>
-              <th className="px-3 py-3 text-right font-medium sm:px-4">Mensal</th>
+              <th className="px-3 py-3 text-right font-medium whitespace-nowrap sm:px-4">
+                Mensal
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -50,36 +52,63 @@ export function ProposalTable({
                   <td className="px-2 py-3 text-right font-medium text-slate-800">
                     {line.positions || 0}
                   </td>
-                  <td className="hidden px-2 py-3 text-right text-slate-600 sm:table-cell">
+                  <td className="hidden px-2 py-3 text-right whitespace-nowrap text-slate-600 sm:table-cell">
                     {formatCurrency(line.unitValue)}
                   </td>
-                  <td className="px-3 py-3 text-right font-semibold text-slate-800 sm:px-4">
+                  <td className="px-3 py-3 text-right font-semibold whitespace-nowrap text-slate-800 sm:px-4">
                     {formatCurrency(line.monthlyValue)}
                   </td>
                 </tr>
               );
             })}
             <tr className="border-t border-slate-200 bg-slate-50">
-              <td colSpan={3} className="px-3 py-3 font-medium text-slate-600 sm:px-4">
+              <td
+                colSpan={2}
+                className="px-3 py-3 font-medium text-slate-600 sm:hidden"
+              >
                 Investimento mensal
               </td>
-              <td className="px-3 py-3 text-right font-bold text-bs-primary sm:px-4">
+              <td
+                colSpan={3}
+                className="hidden px-3 py-3 font-medium text-slate-600 sm:table-cell sm:px-4"
+              >
+                Investimento mensal
+              </td>
+              <td className="px-3 py-3 text-right font-bold whitespace-nowrap text-bs-primary sm:px-4">
                 {formatCurrency(monthlyValue)}
               </td>
             </tr>
             <tr className="bg-white">
-              <td colSpan={3} className="px-3 py-3 font-medium text-slate-600 sm:px-4">
+              <td
+                colSpan={2}
+                className="px-3 py-3 font-medium text-slate-600 sm:hidden"
+              >
                 Investimento anual
               </td>
-              <td className="px-3 py-3 text-right font-bold text-bs-primary sm:px-4">
+              <td
+                colSpan={3}
+                className="hidden px-3 py-3 font-medium text-slate-600 sm:table-cell sm:px-4"
+              >
+                Investimento anual
+              </td>
+              <td className="px-3 py-3 text-right font-bold whitespace-nowrap text-bs-primary sm:px-4">
                 {formatCurrency(annualValue)}
               </td>
             </tr>
             <tr className="bg-slate-50">
-              <td colSpan={3} className="px-3 py-3 font-medium text-slate-600 sm:px-4">
+              <td
+                colSpan={2}
+                className="px-3 py-3 font-medium text-slate-600 sm:hidden"
+              >
                 Prazo do contrato
               </td>
-              <td className="px-3 py-3 text-right font-semibold text-slate-800 sm:px-4">
+              <td
+                colSpan={3}
+                className="hidden px-3 py-3 font-medium text-slate-600 sm:table-cell sm:px-4"
+              >
+                Prazo do contrato
+              </td>
+              <td className="px-3 py-3 text-right font-semibold whitespace-nowrap text-slate-800 sm:px-4">
                 {contractTerm || "—"}
               </td>
             </tr>

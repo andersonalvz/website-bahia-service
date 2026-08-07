@@ -12,7 +12,7 @@ export function ProposalClients() {
       </p>
 
       <div className="clients-logos-frame mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
-        <div className="relative mx-auto h-[420px] w-full max-w-2xl sm:h-[480px]">
+        <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl max-h-[220px] sm:max-h-[360px]">
           <Image
             src={CLIENTS_SECTION.image}
             alt={CLIENTS_SECTION.imageAlt}

@@ -34,7 +34,7 @@ export function ProposalPreview({ data, totals }: ProposalPreviewProps) {
 
       <article
         id="proposal-document"
-        className="proposal-document mx-auto w-full max-w-[210mm] origin-top rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_16px_50px_rgba(27,54,93,0.08)] sm:p-8 lg:p-10"
+        className="proposal-document mx-auto w-full max-w-[210mm] origin-top rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_16px_50px_rgba(27,54,93,0.08)] sm:p-8 lg:p-10"
       >
         <ProposalHeader
           companyName={data.companyName}

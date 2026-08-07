@@ -38,15 +38,15 @@ export function ProposalFooter() {
           Contato
         </p>
         <div className="contact-details mt-3 space-y-2 text-sm">
-          <p>
+          <p className="break-words">
             <span className="text-white/70">Telefones: </span>
             {BRAND.contact.phones.join(" · ")}
           </p>
-          <p>
+          <p className="break-all">
             <span className="text-white/70">E-mail: </span>
             {BRAND.contact.email}
           </p>
-          <p>
+          <p className="break-words">
             <span className="text-white/70">Endereço: </span>
             {BRAND.contact.address}
           </p>

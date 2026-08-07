@@ -23,7 +23,7 @@ export function ProposalGenerator() {
   }
 
   return (
-    <div className="proposal-layout mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[minmax(320px,400px)_1fr] lg:gap-8 lg:px-6 lg:py-8">
+    <div className="proposal-layout mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-5 lg:grid-cols-[minmax(320px,400px)_1fr] lg:gap-8 lg:px-6 lg:py-8">
       <ProposalForm
         data={data}
         totals={totals}

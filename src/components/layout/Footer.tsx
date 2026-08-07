@@ -51,7 +51,7 @@ export function Footer() {
               <li>
                 <a
                   href={`tel:${BRAND.contact.phones[0].replace(/\D/g, "")}`}
-                  className="transition hover:text-bs-primary"
+                  className="break-words transition hover:text-bs-primary"
                 >
                   {BRAND.contact.phones.join(" · ")}
                 </a>
@@ -71,18 +71,18 @@ export function Footer() {
               <li>
                 <a
                   href={`mailto:${BRAND.contact.email}`}
-                  className="transition hover:text-bs-primary"
+                  className="break-all transition hover:text-bs-primary"
                 >
                   {BRAND.contact.email}
                 </a>
               </li>
-              <li className="leading-relaxed">{BRAND.contact.address}</li>
+              <li className="leading-relaxed break-words">{BRAND.contact.address}</li>
             </ul>
           </div>
         </div>
 
         <div className="mt-10 flex flex-col gap-2 border-t border-slate-200/80 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>
+          <p className="break-words">
             © {year} {BRAND.legalName}
           </p>
           <p>

@@ -43,12 +43,12 @@ export function ContactInfo() {
                   ? "noopener noreferrer"
                   : undefined
               }
-              className="mt-2 block text-sm font-medium leading-relaxed text-bs-primary transition hover:text-bs-secondary"
+              className="mt-2 block break-words text-sm font-medium leading-relaxed text-bs-primary transition hover:text-bs-secondary [overflow-wrap:anywhere]"
             >
               {item.value}
             </a>
           ) : (
-            <p className="mt-2 text-sm font-medium leading-relaxed text-bs-primary">
+            <p className="mt-2 break-words text-sm font-medium leading-relaxed text-bs-primary [overflow-wrap:anywhere]">
               {item.value}
             </p>
           )}

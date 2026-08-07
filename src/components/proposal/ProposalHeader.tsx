@@ -45,10 +45,10 @@ export function ProposalHeader({
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Cliente
           </p>
-          <p className="mt-1 text-base font-semibold text-bs-primary">
+          <p className="mt-1 break-words text-base font-semibold text-bs-primary">
             {companyName || "Nome da empresa"}
           </p>
-          <p className="text-sm text-slate-600">
+          <p className="break-words text-sm text-slate-600">
             {contactName || "Responsável"}
             {city ? ` · ${city}` : ""}
           </p>

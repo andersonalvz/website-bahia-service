@@ -18,9 +18,9 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "rounded-full px-3 py-1.5 text-xs font-semibold",
-  md: "rounded-2xl px-5 py-3 text-sm font-semibold",
-  lg: "rounded-2xl px-6 py-3.5 text-sm font-semibold",
+  sm: "min-h-10 rounded-full px-3.5 py-2 text-xs font-semibold",
+  md: "min-h-11 rounded-2xl px-5 py-3 text-sm font-semibold",
+  lg: "min-h-12 rounded-2xl px-6 py-3.5 text-sm font-semibold",
 };
 
 interface ButtonBaseProps {

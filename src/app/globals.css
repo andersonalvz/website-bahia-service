@@ -26,6 +26,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -36,6 +37,8 @@ body {
   color: var(--foreground);
   font-family: var(--font-manrope), "Segoe UI", sans-serif;
   min-height: 100vh;
+  overflow-x: clip;
+  overflow-wrap: anywhere;
 }
 
 .font-display {

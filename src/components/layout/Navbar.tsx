@@ -58,12 +58,12 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button href="/contato" size="sm" className="hidden sm:inline-flex">
+          <Button href="/contato" size="sm" className="hidden min-h-10 md:inline-flex">
             Fale conosco
           </Button>
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-bs-primary md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-bs-primary md:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Fechar menu" : "Abrir menu"}
@@ -91,7 +91,7 @@ export function Navbar() {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "rounded-xl px-3 py-2.5 text-sm font-medium",
+                    "rounded-xl px-3 py-3 text-sm font-medium",
                     active
                       ? "bg-bs-primary/5 text-bs-primary"
                       : "text-slate-600 hover:bg-slate-50"

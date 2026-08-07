@@ -25,14 +25,13 @@ export function Hero({
   className,
 }: HeroProps) {
   return (
-    <section className={cn("relative overflow-hidden", className)}>
-      {/* Aspect matches company-hero.png (3076×1376) to avoid distortion */}
+    <section className={cn("relative", className)}>
       <div
         className={cn(
-          "relative w-full bg-slate-100",
+          "relative w-full overflow-hidden bg-slate-100",
           compact
-            ? "aspect-[21/9] min-h-[240px] max-h-[420px]"
-            : "aspect-[3076/1376] min-h-[280px] max-h-[720px]"
+            ? "aspect-[16/10] min-h-[280px] max-h-[420px] sm:aspect-[21/9] sm:min-h-[260px]"
+            : "aspect-[4/3] min-h-[360px] max-h-[720px] sm:aspect-[16/9] lg:aspect-[3076/1376] lg:min-h-[420px]"
         )}
       >
         <Image
@@ -44,9 +43,9 @@ export function Hero({
           className="object-cover object-center"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-bs-primary/80 via-bs-primary/35 to-bs-primary/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bs-primary/85 via-bs-primary/40 to-bs-primary/15" />
 
-        <Container className="absolute inset-0 flex flex-col justify-end pb-8 sm:pb-12 lg:pb-14">
+        <Container className="absolute inset-0 flex flex-col justify-end pb-6 sm:pb-10 lg:pb-14">
           <div className="max-w-2xl text-white animate-fade-up">
             {eyebrow ? (
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
@@ -55,21 +54,21 @@ export function Hero({
             ) : null}
             <h1
               className={cn(
-                "font-display font-bold tracking-tight",
+                "font-display font-bold tracking-tight text-balance",
                 compact
-                  ? "mt-2 text-3xl sm:text-4xl"
-                  : "mt-3 text-3xl sm:text-5xl lg:text-6xl"
+                  ? "mt-2 text-2xl sm:text-3xl md:text-4xl"
+                  : "mt-2 text-2xl sm:text-4xl md:text-5xl lg:text-6xl"
               )}
             >
               {title}
             </h1>
             {description ? (
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/85 sm:mt-4 sm:text-base animate-fade-up-delay-1">
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/85 sm:mt-4 sm:text-base animate-fade-up-delay-1">
                 {description}
               </p>
             ) : null}
             {actions ? (
-              <div className="mt-7 flex flex-wrap gap-3 animate-fade-up-delay-2">
+              <div className="mt-5 flex flex-wrap gap-3 sm:mt-7 animate-fade-up-delay-2">
                 {actions}
               </div>
             ) : null}

@@ -25,8 +25,8 @@ export function ClientsShowcase({
         {CLIENTS_SECTION.title}
       </Heading>
 
-      <div className="clients-logos-frame mt-10 overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_40px_rgba(27,54,93,0.06)] sm:p-6">
-        <div className="relative mx-auto h-[320px] w-full max-w-3xl sm:h-[420px] lg:h-[480px]">
+      <div className="clients-logos-frame mt-10 overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_10px_40px_rgba(27,54,93,0.06)] sm:p-6">
+        <div className="relative mx-auto aspect-[4/3] w-full max-w-3xl max-h-[240px] sm:aspect-[16/10] sm:max-h-[360px] lg:max-h-[480px]">
           <Image
             src={CLIENTS_SECTION.image}
             alt={CLIENTS_SECTION.imageAlt}

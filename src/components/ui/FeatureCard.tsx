@@ -22,7 +22,7 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_40px_rgba(27,54,93,0.06)] transition hover:shadow-[0_16px_50px_rgba(27,54,93,0.08)]">
-      <div className="relative aspect-[21/9] overflow-hidden bg-slate-100 sm:aspect-[16/10]">
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
         <Image
           src={image}
           alt={title}
@@ -46,7 +46,7 @@ export function FeatureCard({
         </p>
         <Link
           href={href}
-          className="mt-4 inline-flex text-sm font-semibold text-bs-secondary transition hover:text-bs-primary"
+          className="mt-4 inline-flex min-h-10 items-center text-sm font-semibold text-bs-secondary transition hover:text-bs-primary"
         >
           {ctaLabel} →
         </Link>

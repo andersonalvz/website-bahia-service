@@ -13,7 +13,7 @@ export function ServiceDetailList() {
           className="scroll-mt-28 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_40px_rgba(27,54,93,0.06)]"
         >
           <div className="grid lg:grid-cols-2">
-            <div className="relative aspect-[21/9] bg-slate-100 lg:aspect-auto lg:min-h-[320px]">
+            <div className="relative aspect-[16/10] bg-slate-100 sm:aspect-[21/9] lg:aspect-auto lg:min-h-[320px]">
               <Image
                 src={service.image}
                 alt={service.title}
@@ -23,16 +23,18 @@ export function ServiceDetailList() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-bs-primary/70 via-bs-primary/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 flex items-center gap-3 text-white">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
+              <div className="absolute bottom-4 left-4 right-4 flex items-end gap-3 text-white">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
                   <ServiceIcon name={service.icon} className="h-5 w-5" />
                 </span>
-                <p className="font-display text-xl font-bold">{service.shortTitle}</p>
+                <p className="min-w-0 font-display text-lg font-bold leading-tight sm:text-xl">
+                  {service.shortTitle}
+                </p>
               </div>
             </div>
 
-            <div className="flex flex-col p-6 sm:p-8">
-              <h2 className="font-display text-2xl font-bold text-bs-primary">
+            <div className="flex flex-col p-5 sm:p-8">
+              <h2 className="font-display text-xl font-bold text-bs-primary sm:text-2xl">
                 {service.title}
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-600">
