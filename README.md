@@ -106,7 +106,13 @@ Se o SHA do commit não aparecer lá, o job **falha** (FTP foi para a pasta erra
 
 ## Impressão / PDF da proposta (`/proposta`)
 
-O botão **Gerar PDF** usa `src/lib/print-proposal.ts`: documento isolado em iframe (largura A4), imagens embutidas como JPEG data URL a partir dos bitmaps já carregados na tela, e CSS de paginação próprio (não depende do `@media print` da página).
+O botão **Gerar PDF** usa `src/lib/print-proposal.ts`:
+
+1. Clona `#proposal-document` num **iframe com largura A4 (794px)** — o mesmo layout em desktop, tablet e iPhone.
+2. Embute as imagens como **JPEG data URL** (capa, serviço estático, logos, marca).
+3. Aplica **CSS autocontido** (não herda Tailwind/media queries da página — isso evitava o PDF do iPhone sair com mais páginas e layout diferente).
+
+Foto do serviço: `/images/services/servico.jpg` (estática, igual para todos os serviços), no mesmo padrão da capa.
 
 ### Rodapé (número da página) e headers nativos do navegador
 

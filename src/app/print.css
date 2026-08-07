@@ -1,30 +1,11 @@
 /**
- * Fallback @media print — usado só se window.print() rodar na página principal.
- * O fluxo normal (Gerar PDF) usa documento isolado em src/lib/print-proposal.ts
- * com CSS próprio. NÃO duplicar page-break-after: always aqui (gera página em branco).
+ * Fallback mínimo — o PDF real usa CSS autocontido em print-proposal.ts.
+ * Mantido só se window.print() for chamado na página principal.
  */
-
 @media print {
   @page {
     size: A4;
-    margin: 12mm 12mm 16mm;
-  }
-
-  @page {
-    @bottom-center {
-      content: counter(page) "/" counter(pages);
-      font-size: 9pt;
-      color: #64748b;
-    }
-  }
-
-  html,
-  body {
-    background: #fff !important;
-    color: #0f172a !important;
-    overflow: visible !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    margin: 12mm;
   }
 
   .no-print,
@@ -45,61 +26,13 @@
     padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
-    overflow: visible !important;
-  }
-
-  .proposal-clients {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .proposal-cover-hero-image {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    max-height: 55mm !important;
-    object-fit: cover !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
   }
 
   .proposal-brand-logo {
-    height: 32px !important;
-    max-width: 120px !important;
-  }
-
-  .proposal-doc-title {
-    white-space: nowrap !important;
-    font-size: 20px !important;
-  }
-
-  .clients-logos-frame img,
-  .clients-logos-image {
-    display: block !important;
-    position: static !important;
-    width: 100% !important;
-    height: auto !important;
-    max-height: 75mm !important;
+    height: 40px !important;
+    width: auto !important;
+    max-width: 160px !important;
     object-fit: contain !important;
-  }
-
-  .proposal-service-hero {
-    min-height: 240px !important;
-    height: 240px !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  .service-hero-image {
-    display: block !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  .proposal-finance-page,
-  .proposal-sla-page {
-    break-before: page;
-    page-break-before: always;
   }
 
   .proposal-table .print-show-cell {
@@ -108,10 +41,5 @@
 
   .proposal-table .print-hide-cell {
     display: none !important;
-  }
-
-  a {
-    text-decoration: none !important;
-    color: inherit !important;
   }
 }

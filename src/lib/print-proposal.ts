@@ -1,18 +1,20 @@
 /**
- * Motor de impressão/PDF — mesmo documento A4 no desktop, tablet e mobile.
+ * Motor de impressão A4 — idêntico em desktop, tablet e mobile.
  *
- * Estratégia:
- * 1. Iframe com viewport 794px (layout desktop, independente do aparelho).
- * 2. Todas as <img> viram JPEG data URL (bitmap embutido) — Safari iOS não
- *    confia em URLs relativas no print do iframe.
- * 3. Foto do serviço também vira background-image no hero (fallback WebKit).
- * 4. CSS de paginação próprio (sem page-break-after nos logos).
+ * Por que mobile saía diferente (ex.: 7 págs vs 4):
+ * - O iframe herdava TODO o CSS da app (Tailwind mobile-first + print.css).
+ * - No Safari iOS, parte das media queries ainda refletia o viewport do aparelho.
+ * - Processamento complexo da foto do serviço (absolute + background) falhava no WebKit.
+ *
+ * Solução:
+ * - Documento isolado com CSS PRÓPRIO (não coleta stylesheets da app).
+ * - Viewport fixo 794px (A4 @ 96dpi).
+ * - Imagens estáticas embutidas como JPEG data URL (capa, serviço, logos, marca).
  */
 
 const PRINT_WIDTH_PX = 794;
 const PRINT_IMAGE_MAX_W = 1400;
-const PRINT_JPEG_QUALITY = 0.85;
-const SERVICE_HERO_PRINT_HEIGHT_PX = 240;
+const PRINT_JPEG_QUALITY = 0.82;
 
 function escapeHtml(value: string): string {
   return value
@@ -30,364 +32,418 @@ function toAbsoluteUrl(src: string): string {
   }
 }
 
-function rasterizeImage(
-  img: CanvasImageSource & { width?: number; height?: number; naturalWidth?: number; naturalHeight?: number },
-  maxWidth = PRINT_IMAGE_MAX_W
-): string | null {
-  const naturalW =
-    ("naturalWidth" in img && img.naturalWidth) || img.width || 0;
-  const naturalH =
-    ("naturalHeight" in img && img.naturalHeight) || img.height || 0;
-  if (!naturalW || !naturalH) return null;
-
-  const scale = Math.min(1, maxWidth / naturalW);
-  const width = Math.max(1, Math.round(naturalW * scale));
-  const height = Math.max(1, Math.round(naturalH * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return null;
-
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
-  ctx.drawImage(img as CanvasImageSource, 0, 0, width, height);
-  return canvas.toDataURL("image/jpeg", PRINT_JPEG_QUALITY);
-}
-
-async function fetchAsDataUrl(src: string): Promise<string> {
-  const absolute = toAbsoluteUrl(src);
-
-  // 1) fetch → blob → createImageBitmap (mais confiável no iOS)
-  try {
-    const res = await fetch(absolute, { cache: "force-cache" });
-    if (res.ok) {
-      const blob = await res.blob();
-      if (typeof createImageBitmap === "function") {
-        const bitmap = await createImageBitmap(blob);
-        const dataUrl = rasterizeImage(bitmap);
-        bitmap.close();
-        if (dataUrl) return dataUrl;
-      }
-      // Fallback: FileReader
-      const readerData = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(blob);
-      });
-      // Re-rasteriza via Image se for PNG grande
-      if (readerData.startsWith("data:image")) {
-        const img = await loadHtmlImage(readerData);
-        return rasterizeImage(img) ?? readerData;
-      }
-      return readerData;
-    }
-  } catch {
-    // continua para Image()
-  }
-
-  const img = await loadHtmlImage(absolute);
-  return rasterizeImage(img) ?? absolute;
-}
-
 function loadHtmlImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.decoding = "async";
     img.onload = () => resolve(img);
     img.onerror = () => reject(new Error(`Falha ao carregar ${src}`));
-    img.src = src;
+    img.src = toAbsoluteUrl(src);
   });
 }
 
-async function resolveDataUrl(
-  rawSrc: string,
-  liveImg?: HTMLImageElement | null
-): Promise<string> {
-  if (rawSrc.startsWith("data:")) return rawSrc;
-
-  if (
-    liveImg &&
-    liveImg.complete &&
-    (liveImg.naturalWidth > 0 || liveImg.width > 0)
-  ) {
-    const fromLive = rasterizeImage(liveImg);
-    if (fromLive) return fromLive;
-  }
-
-  try {
-    return await fetchAsDataUrl(rawSrc);
-  } catch {
-    return toAbsoluteUrl(rawSrc);
-  }
+function rasterizeToJpeg(img: HTMLImageElement): string {
+  const naturalW = img.naturalWidth || img.width;
+  const naturalH = img.naturalHeight || img.height;
+  const scale = Math.min(1, PRINT_IMAGE_MAX_W / Math.max(1, naturalW));
+  const width = Math.max(1, Math.round(naturalW * scale));
+  const height = Math.max(1, Math.round(naturalH * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return toAbsoluteUrl(img.src);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(img, 0, 0, width, height);
+  return canvas.toDataURL("image/jpeg", PRINT_JPEG_QUALITY);
 }
 
-/**
- * Embute todas as imagens do clone como data URL e reforça a foto do serviço
- * com background-image (mesmo resultado no mobile e no desktop).
- */
-async function preparePrintClone(
-  liveRoot: HTMLElement,
-  cloneRoot: HTMLElement
-): Promise<void> {
-  const liveImgs = Array.from(liveRoot.querySelectorAll("img"));
-  const cloneImgs = Array.from(cloneRoot.querySelectorAll("img"));
+async function toDataUrl(src: string): Promise<string> {
+  if (src.startsWith("data:")) return src;
+  const img = await loadHtmlImage(src);
+  return rasterizeToJpeg(img);
+}
 
-  const liveBySrc = new Map<string, HTMLImageElement>();
-  for (const img of liveImgs) {
-    const key = img.currentSrc || img.getAttribute("src") || "";
-    if (key) liveBySrc.set(key, img);
-    try {
-      liveBySrc.set(toAbsoluteUrl(key), img);
-    } catch {
-      /* ignore */
-    }
-  }
-
+/** Embute cada <img> do clone como data URL (mesmo bitmap em qualquer aparelho). */
+async function embedImages(cloneRoot: HTMLElement): Promise<void> {
+  const imgs = Array.from(cloneRoot.querySelectorAll("img"));
   await Promise.all(
-    cloneImgs.map(async (cloneImg, index) => {
-      const rawSrc =
-        cloneImg.getAttribute("src") ||
-        liveImgs[index]?.currentSrc ||
-        liveImgs[index]?.getAttribute("src") ||
-        "";
-      if (!rawSrc) return;
-
-      const liveMatch =
-        liveBySrc.get(rawSrc) ||
-        liveBySrc.get(toAbsoluteUrl(rawSrc)) ||
-        liveImgs[index] ||
-        null;
-
-      const dataUrl = await resolveDataUrl(rawSrc, liveMatch);
-
-      cloneImg.setAttribute("src", dataUrl);
-      cloneImg.removeAttribute("srcset");
-      cloneImg.removeAttribute("sizes");
-      cloneImg.removeAttribute("loading");
-      cloneImg.style.cssText = [
-        "display:block",
-        "position:static",
-        "width:100%",
-        "height:auto",
-        "max-width:100%",
-        "object-fit:cover",
-        "object-position:center",
-        "-webkit-print-color-adjust:exact",
-        "print-color-adjust:exact",
-      ].join(";");
-
-      // Reforço WebKit: hero do serviço com background + altura explícita
-      if (
-        cloneImg.classList.contains("service-hero-image") ||
-        cloneImg.getAttribute("data-print-image") === "service-hero"
-      ) {
-        const hero = cloneImg.closest(
-          ".proposal-service-hero"
-        ) as HTMLElement | null;
-        if (hero) {
-          hero.style.cssText = [
-            "position:relative",
-            "display:block",
-            "width:100%",
-            `min-height:${SERVICE_HERO_PRINT_HEIGHT_PX}px`,
-            `height:${SERVICE_HERO_PRINT_HEIGHT_PX}px`,
-            `background-image:url("${dataUrl}")`,
-            "background-size:cover",
-            "background-position:center",
-            "background-repeat:no-repeat",
-            "-webkit-print-color-adjust:exact",
-            "print-color-adjust:exact",
-            "overflow:hidden",
-          ].join(";");
-          cloneImg.style.cssText = [
-            "display:block",
-            "position:absolute",
-            "inset:0",
-            "width:100%",
-            "height:100%",
-            "object-fit:cover",
-            "opacity:1",
-            "-webkit-print-color-adjust:exact",
-            "print-color-adjust:exact",
-          ].join(";");
-        }
+    imgs.map(async (img) => {
+      const src = img.getAttribute("src");
+      if (!src) return;
+      try {
+        const dataUrl = await toDataUrl(src);
+        img.setAttribute("src", dataUrl);
+        img.removeAttribute("srcset");
+        img.removeAttribute("sizes");
+        img.removeAttribute("loading");
+      } catch {
+        img.setAttribute("src", toAbsoluteUrl(src));
       }
     })
   );
 }
 
-function collectAppStylesheets(): string {
-  return Array.from(
-    document.querySelectorAll('link[rel="stylesheet"], style')
-  )
-    .map((node) => node.outerHTML)
-    .join("\n");
-}
-
-function buildPrintOverrideStylesheet(): string {
+/** CSS autocontido — única fonte de layout do PDF. */
+function buildPrintDocumentCss(): string {
   return `
-    @page {
-      size: A4;
-      margin: 12mm 12mm 16mm;
-    }
+    @page { size: A4; margin: 12mm 12mm 14mm; }
     @page {
       @bottom-center {
         content: counter(page) "/" counter(pages);
-        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
         font-size: 9pt;
         color: #64748b;
       }
     }
 
+    * { box-sizing: border-box; }
+
     html, body {
-      width: ${PRINT_WIDTH_PX}px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      background: #fff !important;
-      overflow: visible !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
+      margin: 0;
+      padding: 0;
+      width: ${PRINT_WIDTH_PX}px;
+      background: #fff;
+      color: #0f172a;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 12px;
+      line-height: 1.45;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .proposal-document {
-      width: 100% !important;
-      max-width: none !important;
-      margin: 0 !important;
-      padding: 6px 2px !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-      background: #fff !important;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: #fff;
     }
-
-    .proposal-brand-logo {
-      height: 32px !important;
-      width: auto !important;
-      max-width: 120px !important;
-    }
-    .proposal-doc-title {
-      font-size: 20px !important;
-      line-height: 1.2 !important;
-      white-space: nowrap !important;
-    }
-    .proposal-header > div:first-child {
-      display: flex !important;
-      flex-direction: row !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      gap: 12px !important;
-    }
-    .proposal-header > div:first-child > div:last-child {
-      text-align: right !important;
-    }
-    .proposal-meta-grid {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-    }
-    .proposal-meta-date { text-align: right !important; }
-
-    .proposal-cover-hero {
-      margin-top: 12px !important;
-      margin-bottom: 0 !important;
-      overflow: hidden !important;
-      border-radius: 12px !important;
-      break-inside: avoid !important;
-    }
-    .proposal-cover-hero-image {
-      display: block !important;
-      width: 100% !important;
-      height: auto !important;
-      max-height: 55mm !important;
-      aspect-ratio: 21 / 9 !important;
-      object-fit: cover !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-
-    .proposal-clients {
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
-      break-after: auto !important;
-      page-break-after: auto !important;
-    }
-    .clients-logos-frame img,
-    .clients-logos-image {
-      display: block !important;
-      position: static !important;
-      width: 100% !important;
-      height: auto !important;
-      max-height: 75mm !important;
-      object-fit: contain !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-
-    .proposal-service-hero {
-      position: relative !important;
-      display: block !important;
-      width: 100% !important;
-      min-height: ${SERVICE_HERO_PRINT_HEIGHT_PX}px !important;
-      height: ${SERVICE_HERO_PRINT_HEIGHT_PX}px !important;
-      overflow: hidden !important;
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    .service-hero-image {
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    .proposal-service-hero-overlay {
-      position: absolute !important;
-      inset: 0 !important;
-      pointer-events: none !important;
-      z-index: 1 !important;
-    }
-    .proposal-service-hero > div:last-child {
-      z-index: 2 !important;
-    }
-
-    .proposal-finance-page {
-      break-before: page !important;
-      page-break-before: always !important;
-    }
-    .proposal-sla-page {
-      break-before: page !important;
-      page-break-before: always !important;
-    }
-
-    .proposal-table .print-show-cell { display: table-cell !important; }
-    .proposal-table .print-hide-cell { display: none !important; }
-    .table-scroll { overflow: visible !important; }
 
     img {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      max-width: 100% !important;
+      display: block;
+      max-width: 100%;
+      height: auto;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
+    /* —— Cabeçalho / marca —— */
+    .proposal-header {
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      overflow: visible;
+    }
+    .proposal-header > div:first-child {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .proposal-brand-logo {
+      display: block;
+      height: 40px;
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
+      object-position: left center;
+    }
+    .proposal-doc-title {
+      margin: 2px 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #1b365d;
+      white-space: nowrap;
+      line-height: 1.15;
+    }
+    .proposal-header > div:first-child > div:last-child {
+      text-align: right;
+      flex: 1;
+      min-width: 0;
+    }
+    .proposal-header > div:first-child > div:last-child p:first-child {
+      margin: 0;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #3d85c6;
+    }
+    .proposal-header > div:first-child > div:last-child p:last-child {
+      margin: 2px 0 0;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .proposal-cover-hero {
+      margin-top: 12px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .proposal-cover-hero-image {
+      width: 100%;
+      height: auto;
+      max-height: 48mm;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .proposal-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 10px;
+    }
+    .proposal-meta-date { text-align: right; }
+    .proposal-meta-grid p { margin: 0; }
+    .proposal-meta-grid p:first-child {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .proposal-summary { margin: 14px 0; }
+    .proposal-summary h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #1b365d;
+    }
+    .proposal-summary p {
+      margin: 0;
+      color: #475569;
+      font-size: 12px;
+    }
+
+    /* —— Clientes —— */
+    .proposal-clients {
+      margin: 14px 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .proposal-clients h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #1b365d;
+    }
+    .proposal-clients > p {
+      margin: 0 0 8px;
+      color: #475569;
+      font-size: 12px;
+    }
+    .clients-logos-frame {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 8px;
+      background: #fff;
+    }
+    .clients-logos-image {
+      width: 100%;
+      max-height: 70mm;
+      object-fit: contain;
+      margin: 0 auto;
+    }
+
+    /* —— Serviço (foto estática, fluxo simples como a capa) —— */
+    .proposal-service { margin: 16px 0; }
+    .proposal-service > div:first-child {
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .proposal-service-hero {
+      position: relative;
+      display: block;
+      width: 100%;
+      background: #e2e8f0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .service-hero-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 55mm;
+      object-fit: cover;
+      object-position: center;
+    }
+    .proposal-service-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(27,54,93,0.75), rgba(27,54,93,0.2), transparent);
+      pointer-events: none;
+    }
+    .proposal-service-hero > div:last-child {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 10px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      color: #fff;
+      z-index: 1;
+    }
+    .proposal-service-hero h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .proposal-service-hero p {
+      margin: 0;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+    }
+    .proposal-service h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #1b365d;
+    }
+    .proposal-service > div:last-child p {
+      margin: 0;
+      color: #475569;
+      font-size: 12px;
+    }
+
+    /* —— Financeiro —— */
+    .proposal-finance-page {
+      break-before: page;
+      page-break-before: always;
+      margin: 0;
+    }
+    .proposal-table { margin-bottom: 14px; break-inside: avoid; }
+    .proposal-table h3 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      color: #1b365d;
+    }
+    .proposal-table > p {
+      margin: 0 0 8px;
+      color: #64748b;
+      font-size: 11px;
+    }
+    .table-scroll { overflow: visible; }
+    .proposal-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+    .proposal-table th {
+      background: #1b365d;
+      color: #fff;
+      text-align: left;
+      padding: 8px 10px;
+      font-weight: 600;
+    }
+    .proposal-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .proposal-table .print-hide-cell { display: none !important; }
+    .proposal-table .print-show-cell { display: table-cell !important; }
+    .proposal-table th:nth-child(2),
+    .proposal-table th:nth-child(3),
+    .proposal-table th:nth-child(4),
+    .proposal-table td:nth-child(2),
+    .proposal-table td:nth-child(3),
+    .proposal-table td:nth-child(4) {
+      text-align: right;
+    }
+
+    .proposal-conditions h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: #1b365d;
+    }
+    .proposal-conditions ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: cond;
+    }
+    .proposal-conditions li {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 6px;
+      color: #475569;
+      font-size: 11.5px;
+      break-inside: avoid;
+    }
+
+    /* —— SLA —— */
+    .proposal-sla-page {
+      break-before: page;
+      page-break-before: always;
+      margin: 0;
+    }
+    .proposal-sla {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #f8fafc;
+    }
+    .proposal-sla h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #1b365d;
+    }
+    .sla-item {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      break-inside: avoid;
+    }
+    .sla-item p { margin: 0; font-size: 11.5px; color: #475569; }
+    .sla-item p:first-child {
+      font-weight: 600;
+      color: #1b365d;
+      margin-bottom: 2px;
+    }
+    .proposal-contact {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #1b365d;
+      color: #fff;
+      break-inside: avoid;
+    }
+    .proposal-contact > p:first-child {
+      margin: 0;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #5ba3d9;
+    }
+    .contact-details {
+      margin-top: 8px;
+      display: grid;
+      gap: 3px;
+      font-size: 11.5px;
+    }
+    .contact-details p { margin: 0; }
+
+    a { color: inherit; text-decoration: none; }
+
     @media print {
-      html, body, .proposal-document {
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: none !important;
-      }
+      html, body { width: 100% !important; }
     }
   `;
 }
 
-function waitForCloneImages(doc: Document): Promise<void> {
+function waitForImages(doc: Document): Promise<void> {
   const images = Array.from(doc.images);
   if (!images.length) return Promise.resolve();
-
   return Promise.all(
     images.map(
       (img) =>
@@ -399,7 +455,7 @@ function waitForCloneImages(doc: Document): Promise<void> {
           const done = () => resolve();
           img.addEventListener("load", done, { once: true });
           img.addEventListener("error", done, { once: true });
-          window.setTimeout(done, 6000);
+          window.setTimeout(done, 5000);
         })
     )
   ).then(() => undefined);
@@ -412,7 +468,6 @@ export async function printProposalDocument(options: {
   const source = document.getElementById(
     options.elementId ?? "proposal-document"
   );
-
   const previousTitle = document.title;
   document.title = options.title;
 
@@ -423,15 +478,14 @@ export async function printProposalDocument(options: {
   }
 
   const clone = source.cloneNode(true) as HTMLElement;
-  await preparePrintClone(source, clone);
+  // Remove chips / elementos só de tela se existirem
+  clone.querySelectorAll(".no-print").forEach((el) => el.remove());
 
-  const clientsImg = clone.querySelector(".clients-logos-frame img");
-  if (clientsImg) clientsImg.classList.add("clients-logos-image");
+  await embedImages(clone);
 
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
   iframe.setAttribute("title", "Impressão da proposta");
-  // Mesmo “canvas” A4 em qualquer aparelho (mobile = desktop)
   iframe.style.cssText = [
     "position:fixed",
     "left:0",
@@ -447,7 +501,6 @@ export async function printProposalDocument(options: {
 
   const doc = iframe.contentDocument;
   const win = iframe.contentWindow;
-
   const cleanup = () => {
     document.title = previousTitle;
     iframe.remove();
@@ -464,10 +517,9 @@ export async function printProposalDocument(options: {
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=${PRINT_WIDTH_PX}, initial-scale=1" />
+<meta name="viewport" content="width=${PRINT_WIDTH_PX}" />
 <title>${escapeHtml(options.title)}</title>
-${collectAppStylesheets()}
-<style id="proposal-print-overrides">${buildPrintOverrideStylesheet()}</style>
+<style>${buildPrintDocumentCss()}</style>
 </head>
 <body>
 ${clone.outerHTML}
@@ -476,11 +528,11 @@ ${clone.outerHTML}
   doc.close();
 
   try {
-    await waitForCloneImages(doc);
-    await new Promise((r) => window.setTimeout(r, 600));
+    await waitForImages(doc);
+    await new Promise((r) => window.setTimeout(r, 400));
     win.focus();
     win.print();
   } finally {
-    window.setTimeout(cleanup, 2500);
+    window.setTimeout(cleanup, 2000);
   }
 }

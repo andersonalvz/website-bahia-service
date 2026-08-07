@@ -17,14 +17,14 @@ export function ProposalHeader({
   return (
     <header className="proposal-header border-b border-slate-200 pb-5">
       <div className="flex flex-row items-center justify-between gap-3 sm:gap-4">
-        <div className="flex min-w-0 shrink-0 items-center">
+        <div className="shrink-0 overflow-visible">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            width={120}
+            width={160}
             height={40}
-            className="proposal-brand-logo h-8 w-auto max-w-[120px] object-contain sm:h-9"
+            className="proposal-brand-logo h-10 w-auto object-contain object-left"
           />
         </div>
 
@@ -32,7 +32,7 @@ export function ProposalHeader({
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-bs-secondary sm:text-[11px]">
             Documento comercial
           </p>
-          <h1 className="proposal-doc-title mt-0.5 font-display text-lg font-bold leading-tight tracking-tight text-bs-primary whitespace-nowrap sm:text-xl md:text-2xl">
+          <h1 className="proposal-doc-title mt-0.5 font-display text-lg font-bold leading-tight tracking-tight text-bs-primary sm:text-xl md:text-2xl">
             Proposta Comercial
           </h1>
           <p className="mt-0.5 text-xs leading-snug text-slate-500 sm:text-sm">
@@ -41,13 +41,12 @@ export function ProposalHeader({
         </div>
       </div>
 
-      {/* Hero institucional — preenche a página 1 no print e empurra o resumo */}
       <div className="proposal-cover-hero mt-4 overflow-hidden rounded-2xl bg-slate-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={BRAND.heroPrint}
           alt={`${BRAND.name} — facilities e serviços corporativos`}
-          className="proposal-cover-hero-image block h-auto w-full object-cover object-center aspect-[21/9] sm:aspect-[2.4/1]"
+          className="proposal-cover-hero-image block aspect-[21/9] h-auto w-full object-cover object-center"
         />
       </div>
 

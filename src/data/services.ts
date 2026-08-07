@@ -69,6 +69,9 @@ export const SERVICES: ServiceContent[] = [
   },
 ];
 
+/** Foto única da seção de serviço na proposta (preview + PDF). */
+export const SERVICE_SECTION_IMAGE = "/images/services/servico.jpg";
+
 export function getServiceById(id: ServiceId): ServiceContent {
   const service = SERVICES.find((item) => item.id === id);
   if (!service) {

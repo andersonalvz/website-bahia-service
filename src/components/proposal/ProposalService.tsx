@@ -19,17 +19,13 @@ export function ProposalService({
   return (
     <section className="proposal-service space-y-5">
       <div className="overflow-hidden rounded-2xl">
+        {/* Foto estática única (mesmo padrão da capa) — sem next/image fill */}
         <div className="proposal-service-hero relative w-full bg-slate-100">
-          {/*
-            img em fluxo + data-src para o motor de print (mobile = desktop).
-            Sem next/image fill (absoluto), que falha no WebKit print.
-          */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image}
             alt={title}
-            data-print-image="service-hero"
-            className="service-hero-image block aspect-[4/3] h-auto w-full object-cover object-center sm:aspect-[16/9] lg:aspect-[21/9]"
+            className="service-hero-image block aspect-[21/9] h-auto w-full object-cover object-center"
           />
           <div className="proposal-service-hero-overlay absolute inset-0 bg-gradient-to-t from-bs-primary/70 via-bs-primary/20 to-transparent" />
           <div className="absolute bottom-3 left-3 right-3 flex items-end gap-2.5 text-white sm:bottom-4 sm:left-4 sm:right-4 sm:gap-3">
