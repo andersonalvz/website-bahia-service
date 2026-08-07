@@ -58,13 +58,13 @@ export function ProposalForm({
   }
 
   return (
-    <aside className="no-print flex h-full flex-col md:sticky md:top-4 md:max-h-[calc(100vh-2rem)] md:self-start">
-      <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_10px_40px_rgba(27,54,93,0.06)] sm:p-6 md:max-h-[calc(100vh-2rem)] md:overflow-y-auto">
-        <div className="mb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-bs-secondary">
+    <aside className="no-print flex w-full min-w-0 max-w-full flex-col lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:self-start">
+      <div className="w-full min-w-0 max-w-full overflow-x-hidden rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_10px_40px_rgba(27,54,93,0.06)] sm:p-6 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto">
+        <div className="mb-6 min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-bs-secondary">
             Gerador
           </p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-bs-primary">
+          <h2 className="mt-1 font-display text-xl font-bold text-bs-primary sm:text-2xl">
             Dados da proposta
           </h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -73,14 +73,14 @@ export function ProposalForm({
         </div>
 
         <form
-          className="space-y-6"
+          className="min-w-0 space-y-6"
           onSubmit={(event) => {
             event.preventDefault();
             onPrint();
           }}
         >
-          <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-bs-primary">
+          <fieldset className="min-w-0 space-y-4">
+            <legend className="px-0 text-sm font-semibold text-bs-primary">
               Dados do cliente
             </legend>
 
@@ -100,7 +100,7 @@ export function ProposalForm({
               required
             />
 
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
+            <div className="grid min-w-0 grid-cols-1 gap-4">
               <Field
                 id="city"
                 label="Cidade"
@@ -109,7 +109,7 @@ export function ProposalForm({
                 required
               />
 
-              <div className="space-y-1.5">
+              <div className="min-w-0 space-y-1.5">
                 <label
                   htmlFor="date"
                   className="text-sm font-medium text-slate-700"
@@ -121,22 +121,22 @@ export function ProposalForm({
                   type="date"
                   value={data.date}
                   onChange={(event) => onChange("date", event.target.value)}
-                  className="field-input min-w-0"
+                  className="field-input field-input-date"
                   required
                 />
               </div>
             </div>
           </fieldset>
 
-          <fieldset className="space-y-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-              <legend className="text-sm font-semibold text-bs-primary">
+          <fieldset className="min-w-0 space-y-4">
+            <div className="flex min-w-0 flex-col gap-2">
+              <legend className="px-0 text-sm font-semibold text-bs-primary">
                 Serviços
               </legend>
               <button
                 type="button"
                 onClick={addServiceLine}
-                className="inline-flex min-h-10 w-full items-center justify-center rounded-full bg-bs-primary/5 px-3 py-2 text-xs font-semibold text-bs-primary transition hover:bg-bs-primary/10 sm:w-auto"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-full bg-bs-primary/5 px-3 py-2 text-xs font-semibold text-bs-primary transition hover:bg-bs-primary/10"
               >
                 + Adicionar serviço
               </button>
@@ -146,9 +146,9 @@ export function ProposalForm({
               {data.services.map((line, index) => (
                 <div
                   key={line.id}
-                  className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5"
+                  className="min-w-0 space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
                     <p className="min-w-0 text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Serviço {index + 1}
                       {index === 0 ? (
@@ -194,8 +194,8 @@ export function ProposalForm({
                     </select>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
-                    <div className="space-y-1.5">
+                  <div className="grid min-w-0 grid-cols-1 gap-3">
+                    <div className="min-w-0 space-y-1.5">
                       <label
                         htmlFor={`positions-${line.id}`}
                         className="text-sm font-medium text-slate-700"
@@ -208,6 +208,7 @@ export function ProposalForm({
                         type="number"
                         min={1}
                         step={1}
+                        inputMode="numeric"
                         value={line.positions}
                         onChange={(event) =>
                           updateServiceLine(
@@ -216,7 +217,7 @@ export function ProposalForm({
                             Number(event.target.value) || 0
                           )
                         }
-                        className="field-input min-w-0"
+                        className="field-input"
                         required
                       />
                     </div>
@@ -272,7 +273,7 @@ export function ProposalForm({
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-bs-secondary">
               Cálculo automático
             </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
+            <div className="mt-3 grid min-w-0 grid-cols-1 gap-3">
               <TotalCard label="Valor mensal" value={totals.monthlyValue} />
               <TotalCard label="Valor anual" value={totals.annualValue} />
             </div>
@@ -305,7 +306,7 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="min-w-0 space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium text-slate-700">
         {label}
         {required ? <span className="text-bs-secondary"> *</span> : null}
@@ -317,6 +318,7 @@ function Field({
         onChange={(event) => onChange(event.target.value)}
         className="field-input"
         required={required}
+        autoComplete="off"
       />
     </div>
   );

@@ -17,10 +17,10 @@ export function ProposalPreview({ data, totals }: ProposalPreviewProps) {
   const summary = summarizeServices(data.services);
 
   return (
-    <div className="proposal-preview-shell">
+    <div className="proposal-preview-shell w-full min-w-0 max-w-full">
       <div className="mb-3 flex flex-wrap items-start justify-between gap-2 no-print">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-bs-secondary">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-bs-secondary">
             Preview
           </p>
           <h2 className="font-display text-lg font-bold text-bs-primary sm:text-xl">
@@ -34,7 +34,7 @@ export function ProposalPreview({ data, totals }: ProposalPreviewProps) {
 
       <article
         id="proposal-document"
-        className="proposal-document mx-auto w-full max-w-[210mm] origin-top overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_16px_50px_rgba(27,54,93,0.08)] sm:p-6 md:p-8 lg:p-10"
+        className="proposal-document mx-auto w-full max-w-full origin-top overflow-x-hidden rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_16px_50px_rgba(27,54,93,0.08)] sm:max-w-[210mm] sm:p-6 md:p-8 lg:p-10"
       >
         <ProposalHeader
           companyName={data.companyName}

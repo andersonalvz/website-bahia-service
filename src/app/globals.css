@@ -26,7 +26,8 @@
 
 html {
   scroll-behavior: smooth;
-  overflow-x: clip;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -37,8 +38,12 @@ body {
   color: var(--foreground);
   font-family: var(--font-manrope), "Segoe UI", sans-serif;
   min-height: 100vh;
-  overflow-x: clip;
+  min-height: 100dvh;
+  max-width: 100%;
+  overflow-x: hidden;
   overflow-wrap: anywhere;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 .font-display {
@@ -46,12 +51,15 @@ body {
 }
 
 .field-input {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border-radius: 0.75rem;
   border: 1px solid #e2e8f0;
   background: #ffffff;
   padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
+  font-size: 16px; /* evita zoom automático no iOS */
   color: #0f172a;
   outline: none;
   transition:
@@ -59,9 +67,41 @@ body {
     box-shadow 150ms ease;
 }
 
+@media (min-width: 640px) {
+  .field-input {
+    font-size: 0.875rem;
+  }
+}
+
+/* Safari iOS: input date tem largura intrínseca que estoura o layout */
+.field-input-date,
+input[type="date"].field-input {
+  max-width: 100%;
+  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.field-input-date::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.25rem;
+}
+
 .field-input:focus {
   border-color: var(--bs-secondary);
   box-shadow: 0 0 0 3px rgba(61, 133, 198, 0.18);
+}
+
+.proposal-layout,
+.proposal-preview-shell,
+.proposal-document {
+  max-width: 100%;
+  min-width: 0;
+}
+
+fieldset {
+  min-width: 0;
+  max-width: 100%;
 }
 
 ::selection {
