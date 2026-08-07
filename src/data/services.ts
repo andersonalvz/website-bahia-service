@@ -20,7 +20,7 @@ export const SERVICES: ServiceContent[] = [
       "Equipes treinadas em boas práticas e sustentabilidade",
       "Uniformes e equipamentos profissionais",
     ],
-    image: "/images/services/servico-limpeza.png",
+    image: "/images/services/servico-limpeza.jpg",
     icon: "sparkles",
   },
   {
@@ -42,7 +42,7 @@ export const SERVICES: ServiceContent[] = [
       "Cronograma preventivo com visitas programadas",
       "Atenção estética e segurança no entorno",
     ],
-    image: "/images/services/servico-jardinagem.png",
+    image: "/images/services/servico-jardinagem.jpg",
     icon: "leaf",
   },
   {
@@ -64,7 +64,7 @@ export const SERVICES: ServiceContent[] = [
       "Supervisão periódica e relatórios gerenciais",
       "Flexibilidade de escala (12x36, 5x2 e especiais)",
     ],
-    image: "/images/services/servico-portaria.png",
+    image: "/images/services/servico-portaria.jpg",
     icon: "shield",
   },
 ];

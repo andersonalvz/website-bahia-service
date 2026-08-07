@@ -2,12 +2,14 @@
  * Impressão da proposta em layout A4/desktop.
  *
  * No iOS/Safari, window.print() na página usa a largura do viewport do
- * aparelho (~390px). Com escala 100%, o PDF fica numa coluna estreita
- * com margens laterais enormes. Aqui clonamos o documento num iframe
- * com largura ~A4 (794px) para o layout desktop aplicar de verdade.
+ * aparelho (~390px). Clonamos o documento num iframe com largura ~A4
+ * (794px) e embutimos as imagens como data URL (JPEG) para o WebKit
+ * rasterizar de forma confiável no diálogo de impressão.
  */
 
 const PRINT_WIDTH_PX = 794;
+const PRINT_IMAGE_MAX_WIDTH = 1200;
+const PRINT_IMAGE_QUALITY = 0.82;
 
 function escapeHtml(value: string): string {
   return value
@@ -25,7 +27,74 @@ function collectStyles(): string {
     .join("\n");
 }
 
-function waitForImages(doc: Document): Promise<void> {
+function toAbsoluteUrl(src: string): string {
+  try {
+    return new URL(src, window.location.href).href;
+  } catch {
+    return src;
+  }
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Falha ao carregar ${src}`));
+    img.src = src;
+  });
+}
+
+/** Converte imagem para JPEG data URL (leve o bastante para o print do Safari). */
+async function imageToPrintDataUrl(src: string): Promise<string> {
+  const absolute = toAbsoluteUrl(src);
+  const img = await loadImage(absolute);
+  const naturalW = img.naturalWidth || img.width;
+  const naturalH = img.naturalHeight || img.height;
+  if (!naturalW || !naturalH) {
+    return absolute;
+  }
+
+  const scale = Math.min(1, PRINT_IMAGE_MAX_WIDTH / naturalW);
+  const width = Math.max(1, Math.round(naturalW * scale));
+  const height = Math.max(1, Math.round(naturalH * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return absolute;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(img, 0, 0, width, height);
+  return canvas.toDataURL("image/jpeg", PRINT_IMAGE_QUALITY);
+}
+
+async function buildPrintMarkup(source: HTMLElement): Promise<string> {
+  const clone = source.cloneNode(true) as HTMLElement;
+  const imgs = Array.from(clone.querySelectorAll("img"));
+
+  await Promise.all(
+    imgs.map(async (img) => {
+      const src = img.getAttribute("src");
+      if (!src || src.startsWith("data:")) return;
+      try {
+        img.setAttribute("src", await imageToPrintDataUrl(src));
+        img.removeAttribute("srcset");
+        img.removeAttribute("sizes");
+        img.style.setProperty("-webkit-print-color-adjust", "exact");
+        img.style.setProperty("print-color-adjust", "exact");
+      } catch {
+        img.setAttribute("src", toAbsoluteUrl(src));
+      }
+    })
+  );
+
+  return clone.outerHTML;
+}
+
+function waitForDataImages(doc: Document): Promise<void> {
   const images = Array.from(doc.images);
   if (images.length === 0) return Promise.resolve();
 
@@ -33,13 +102,15 @@ function waitForImages(doc: Document): Promise<void> {
     images.map(
       (img) =>
         new Promise<void>((resolve) => {
-          if (img.complete) {
+          if (img.complete && img.naturalWidth > 0) {
             resolve();
             return;
           }
           const done = () => resolve();
           img.addEventListener("load", done, { once: true });
           img.addEventListener("error", done, { once: true });
+          // Fallback se o evento não disparar
+          window.setTimeout(done, 4000);
         })
     )
   ).then(() => undefined);
@@ -67,15 +138,17 @@ export async function printProposalDocument(options: {
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
   iframe.setAttribute("title", "Impressão da proposta");
+  // WebKit ignora/não decodifica imagens em iframe 0×0 — precisa de tamanho real
   iframe.style.cssText = [
     "position:fixed",
-    "right:0",
-    "bottom:0",
-    "width:0",
-    "height:0",
+    "left:0",
+    "top:0",
+    `width:${PRINT_WIDTH_PX}px`,
+    "height:1123px",
     "border:0",
     "opacity:0",
     "pointer-events:none",
+    "z-index:-1",
   ].join(";");
 
   document.body.appendChild(iframe);
@@ -89,7 +162,13 @@ export async function printProposalDocument(options: {
     return;
   }
 
-  const markup = source.outerHTML;
+  let markup: string;
+  try {
+    markup = await buildPrintMarkup(source);
+  } catch {
+    markup = source.outerHTML;
+  }
+
   const styles = collectStyles();
 
   doc.open();
@@ -112,9 +191,6 @@ ${styles}
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  body {
-    padding: 0 !important;
-  }
   .proposal-document {
     width: ${PRINT_WIDTH_PX}px !important;
     max-width: ${PRINT_WIDTH_PX}px !important;
@@ -126,22 +202,38 @@ ${styles}
     overflow: visible !important;
     background: #ffffff !important;
   }
-  /* Foto do serviço: sempre no fluxo, impressão WebKit */
+  .proposal-service .proposal-service-hero {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+    overflow: hidden !important;
+    background: #e2e8f0 !important;
+  }
   .proposal-service .service-hero-image {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     position: static !important;
     width: 100% !important;
     height: auto !important;
-    max-height: 75mm !important;
+    max-height: none !important;
+    aspect-ratio: 21 / 9 !important;
     object-fit: cover !important;
+    object-position: center !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  .proposal-service .proposal-service-hero {
-    position: relative !important;
-    aspect-ratio: auto !important;
-    height: auto !important;
-    overflow: hidden !important;
+  .proposal-service .proposal-service-hero-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+  }
+  img {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    max-width: 100% !important;
   }
   @media print {
     @page { size: A4; margin: 10mm 12mm; }
@@ -165,13 +257,11 @@ ${markup}
   };
 
   try {
-    await waitForImages(doc);
-    // Pequeno atraso: WebKit precisa pintar antes de abrir o diálogo
-    await new Promise((resolve) => window.setTimeout(resolve, 250));
+    await waitForDataImages(doc);
+    await new Promise((resolve) => window.setTimeout(resolve, 400));
     win.focus();
     win.print();
   } finally {
-    // afterprint no iframe é inconsistente no iOS — limpa com atraso
-    window.setTimeout(cleanup, 1500);
+    window.setTimeout(cleanup, 2000);
   }
 }

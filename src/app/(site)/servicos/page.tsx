@@ -18,7 +18,7 @@ export default function ServicosPage() {
         eyebrow="Serviços"
         title="Soluções em facilities"
         description="Equipes especializadas e gestão profissional para cada necessidade operacional."
-        image="/images/services/servico-limpeza.png"
+        image="/images/services/servico-limpeza.jpg"
       />
 
       <Section>

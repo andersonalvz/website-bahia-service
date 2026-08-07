@@ -131,10 +131,12 @@
 
   .proposal-service .service-hero-image {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     position: static !important;
     width: 100% !important;
     height: auto !important;
-    max-height: 75mm !important;
+    max-height: none !important;
     object-fit: cover !important;
     object-position: center !important;
     -webkit-print-color-adjust: exact !important;
