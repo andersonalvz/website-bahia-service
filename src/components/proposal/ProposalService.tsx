@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { ServiceIconName } from "@/types/service";
 import { ServiceIcon } from "./ServiceIcon";
 
@@ -24,35 +23,30 @@ export function ProposalService({
   return (
     <section className="proposal-service space-y-5">
       <div className="overflow-hidden rounded-2xl">
-        <div className="proposal-service-hero relative aspect-[4/3] w-full bg-slate-100 print:aspect-auto sm:aspect-[16/9] lg:aspect-[21/9]">
-          {/* Tela: next/image fill */}
-          <Image
-            src={image}
-            alt={title}
-            fill
-            quality={90}
-            className="service-hero-screen object-cover object-center print:hidden"
-            sizes="(max-width: 768px) 100vw, 700px"
-          />
-          {/* Print: img em fluxo — Safari/iPad não imprime fill absoluto de forma confiável */}
+        <div className="proposal-service-hero relative w-full bg-slate-100">
+          {/*
+            img sempre visível no DOM (sem display:none).
+            Safari/iPad não rasteriza no print imagens que estavam hidden na tela.
+            Evita também next/image fill (posição absoluta), instável no print WebKit.
+          */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image}
             alt={title}
-            className="service-hero-print hidden h-auto w-full object-cover object-center print:block"
+            className="service-hero-image block aspect-[4/3] h-auto w-full object-cover object-center sm:aspect-[16/9] lg:aspect-[21/9]"
           />
           <div className="proposal-service-hero-overlay absolute inset-0 bg-gradient-to-t from-bs-primary/70 via-bs-primary/20 to-transparent" />
-          <div className="absolute bottom-3 left-3 right-3 flex items-end gap-2.5 text-white print:bottom-4 print:left-4 print:right-4 print:gap-3 sm:bottom-4 sm:left-4 sm:right-4 sm:gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm print:h-10 print:w-10 sm:h-10 sm:w-10">
+          <div className="absolute bottom-3 left-3 right-3 flex items-end gap-2.5 text-white sm:bottom-4 sm:left-4 sm:right-4 sm:gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm sm:h-10 sm:w-10">
               <ServiceIcon name={icon} className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 print:text-[11px] sm:text-[11px]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 sm:text-[11px]">
                 {serviceLabels.length > 1
                   ? "Serviços propostos"
                   : "Serviço proposto"}
               </p>
-              <h2 className="font-display text-lg font-bold leading-tight break-words print:text-2xl sm:text-xl md:text-2xl">
+              <h2 className="font-display text-lg font-bold leading-tight break-words sm:text-xl md:text-2xl">
                 {title}
               </h2>
             </div>
@@ -82,7 +76,7 @@ export function ProposalService({
         </p>
       </div>
 
-      <div className="proposal-service-columns grid gap-5 print:grid-cols-2 sm:grid-cols-2">
+      <div className="proposal-service-columns grid gap-5 sm:grid-cols-2">
         <div>
           <h3 className="font-display text-base font-semibold text-bs-primary">
             Benefícios

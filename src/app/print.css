@@ -115,9 +115,9 @@
     print-color-adjust: exact !important;
   }
 
-  /* —— Serviço: hero + foto print-safe (Safari/iPad) —— */
+  /* —— Serviço: hero + foto (img sempre no fluxo) —— */
   .proposal-service > div:first-child {
-    overflow: visible !important;
+    overflow: hidden !important;
   }
 
   .proposal-service .proposal-service-hero {
@@ -125,17 +125,13 @@
     aspect-ratio: auto !important;
     height: auto !important;
     min-height: 0 !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     background: transparent !important;
   }
 
-  /* next/image fill some vezes some no print do WebKit */
-  .proposal-service .service-hero-screen {
-    display: none !important;
-  }
-
-  .proposal-service .service-hero-print {
+  .proposal-service .service-hero-image {
     display: block !important;
+    position: static !important;
     width: 100% !important;
     height: auto !important;
     max-height: 75mm !important;

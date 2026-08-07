@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createDefaultProposal } from "@/data/defaults";
 import { getProposalTotals } from "@/lib/calculations";
+import { printProposalDocument } from "@/lib/print-proposal";
 import type { ProposalFormData } from "@/types/proposal";
 import { ProposalForm } from "./ProposalForm";
 import { ProposalPreview } from "./ProposalPreview";
@@ -18,20 +19,11 @@ export function ProposalGenerator() {
     setData((current) => ({ ...current, [field]: value }));
   }
 
-  function handlePrint() {
-    const previousTitle = document.title;
+  async function handlePrint() {
     const company = data.companyName.trim() || "Cliente";
-    // Nome sugerido ao salvar PDF no navegador: "Proposta {empresa}"
-    document.title = `Proposta ${company}`;
-
-    const restoreTitle = () => {
-      document.title = previousTitle;
-      window.removeEventListener("afterprint", restoreTitle);
-    };
-    window.addEventListener("afterprint", restoreTitle);
-    window.setTimeout(restoreTitle, 60_000);
-
-    window.print();
+    await printProposalDocument({
+      title: `Proposta ${company}`,
+    });
   }
 
   return (
