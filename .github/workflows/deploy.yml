@@ -5,13 +5,13 @@
 #
 # Secrets/vars opcionais:
 #   FTP_PORT          (padrão: 21)
-#   FTP_SERVER_DIR    (padrão: ./)  ← caminho relativo ao login FTP
+#   FTP_SERVER_DIR    (padrão: ./)  ← FTP deploy@ já entra em public_html
 #   PRODUCTION_URL    (padrão: https://www.bahiaservice.com.br)
 #
-# HostGator — escolha de FTP_SERVER_DIR:
-#   - FTP já entra em public_html  → use ./
-#   - FTP entra na home da conta   → use public_html/
-#   NÃO use /public_html/ (barra inicial) se o usuário FTP já estiver em public_html.
+# HostGator Bahia Service:
+#   Conta FTP: deploy@bahiaservice.com.br
+#   Diretório: /home1/gracam74/public_html  → FTP_SERVER_DIR=./
+#   (Se usar gracam74 na home: FTP_SERVER_DIR=public_html/)
 #
 # Build: next.config.ts → output: "export" → pasta `out/`
 
@@ -84,17 +84,22 @@ jobs:
       - name: Resolve FTP server directory
         id: ftpdir
         env:
-          # Preferir secret; se vazio, usar ./ (FTP já dentro de public_html — caso HostGator mais comum)
           RAW_DIR: ${{ secrets.FTP_SERVER_DIR }}
         run: |
           set -euo pipefail
+          # deploy@bahiaservice.com.br → /home1/gracam74/public_html → use ./
           DIR="${RAW_DIR:-./}"
 
-          # Valor antigo do workflow (/public_html/) costuma NÃO atualizar o site
-          # quando o usuário FTP da HostGator já inicia dentro de public_html.
+          # Normaliza formas comuns
           if [ "$DIR" = "/public_html" ] || [ "$DIR" = "/public_html/" ]; then
-            echo "⚠️ FTP_SERVER_DIR=/public_html/ detectado — convertendo para ./ (corrige deploy fantasma)."
-            echo "   Se o FTP entrar na HOME da conta (não em public_html), defina o secret como: public_html/"
+            # Com FTP já em public_html, /public_html/ cria pasta errada; use ./
+            echo "⚠️ /public_html/ com FTP jailed em public_html → convertendo para ./"
+            DIR="./"
+          fi
+          if [ "$DIR" = "public_html" ] || [ "$DIR" = "public_html/" ]; then
+            echo "ℹ️ FTP_SERVER_DIR=public_html/ — ok só se o login FTP for a home (gracam74)"
+          fi
+          if [ "$DIR" = "." ]; then
             DIR="./"
           fi
 
@@ -157,10 +162,11 @@ jobs:
           done
 
           echo "::error::O Actions fez upload FTP, mas o site público NÃO serve este commit."
-          echo "Causa mais comum na HostGator: FTP_SERVER_DIR errado."
-          echo "  - Se o FTP já abre dentro de public_html → defina o secret FTP_SERVER_DIR como ./"
-          echo "  - Se o FTP abre na home da conta → defina FTP_SERVER_DIR como public_html/"
-          echo "Site ainda parece servir a versão antiga de 05/08 (manual)."
+          echo "Caminho real: /home1/gracam74/public_html"
+          echo "Secrets esperados:"
+          echo "  FTP_USERNAME=deploy@bahiaservice.com.br"
+          echo "  FTP_SERVER_DIR=./"
+          echo "  (diretório FTP = /home1/gracam74/public_html)"
           exit 1
 
       - name: Deploy summary

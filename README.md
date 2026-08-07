@@ -92,11 +92,14 @@ Pipeline: `.github/workflows/deploy.yml` (dispara em push na `main`).
 | `FTP_PORT` | não | Padrão `21` |
 | `FTP_SERVER_DIR` | não* | Pasta remota relativa ao login FTP |
 
-\* **Importante (HostGator):** o valor padrão do workflow é `./`
+\* **Bahia Service:** conta FTP `deploy@bahiaservice.com.br` → `/home1/gracam74/public_html`
 
-- Se o FTP **já entra em `public_html`** → use `./` (padrão)
-- Se o FTP **entra na home da conta** → use `public_html/`
-- Evite `/public_html/` com barra inicial quando o usuário já está em `public_html` — o upload “funciona”, mas **não atualiza o site**
+| Secret | Valor |
+|--------|--------|
+| `FTP_USERNAME` | `deploy@bahiaservice.com.br` |
+| `FTP_SERVER_DIR` | `./` |
+| `FTP_SERVER` | host FTP da HostGator |
+| `FTP_PASSWORD` | senha da conta `deploy@` |
 
 Após o deploy, o Actions verifica `https://www.bahiaservice.com.br/deploy-version.txt`.  
 Se o SHA do commit não aparecer lá, o job **falha** (FTP foi para a pasta errada).
