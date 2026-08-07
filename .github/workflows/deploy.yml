@@ -1,0 +1,122 @@
+# CI/CD — Site institucional Bahia Service (Next.js static export → HostGator FTP)
+#
+# Pré-requisitos (Repository Secrets):
+#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_PORT
+#
+# Build: next.config.ts → output: "export" → pasta `out/`
+
+name: Deploy HostGator
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hostgator-production
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy to public_html
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Next.js 15 — Node 20 LTS (estável em CI; evita Node 24 experimental)
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ]; then
+            echo "✅ package-lock.json encontrado — usando npm ci"
+            npm ci
+          else
+            echo "⚠️ package-lock.json ausente — usando npm install"
+            npm install
+          fi
+
+      - name: Build (static export)
+        run: |
+          set -euo pipefail
+          echo "🏗️ Executando npm run build (next build --turbopack + output: export)"
+          npm run build
+
+      - name: Detect export directory
+        id: export_dir
+        run: |
+          set -euo pipefail
+
+          echo "🔎 Procurando diretório de exportação estática..."
+
+          if [ -d "out" ] && [ -f "out/index.html" ]; then
+            DIR="out"
+          elif [ -d "dist" ] && [ -f "dist/index.html" ]; then
+            DIR="dist"
+          elif [ -d "build" ] && [ -f "build/index.html" ]; then
+            DIR="build"
+          else
+            echo "❌ Nenhum diretório de export válido encontrado (out/dist/build com index.html)."
+            echo "Conteúdo do workspace:"
+            ls -la
+            exit 1
+          fi
+
+          echo "✅ Diretório detectado: ${DIR}/"
+          echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
+          echo "local_dir=./${DIR}/" >> "$GITHUB_OUTPUT"
+
+          echo "📦 Conteúdo de ${DIR}/:"
+          ls -la "${DIR}"
+          echo "📊 Tamanho:"
+          du -sh "${DIR}" "${DIR}/_next" "${DIR}/images" 2>/dev/null || true
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          # Pasta gerada pelo Next.js static export (detectada no passo anterior)
+          local-dir: ${{ steps.export_dir.outputs.local_dir }}
+          # Destino na hospedagem compartilhada HostGator
+          server-dir: /public_html/
+          # NÃO limpar a pasta remota inteira (preserva cgi-bin, .htaccess, etc.)
+          dangerous-clean-slate: false
+          # HostGator costuma usar certificados que falham em modo strict
+          security: loose
+          # Upload grande (imagens do site ~25MB+) — timeout generoso
+          timeout: 600000
+          log-level: standard
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.DS_Store
+            **/cgi-bin/**
+            **/.well-known/**
+            .htaccess
+            error_log
+            **/error_log
+
+      - name: Deploy summary
+        if: success()
+        run: |
+          echo "✅ Deploy concluído com sucesso"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Artefato local: ${{ steps.export_dir.outputs.local_dir }}"
+          echo "Destino remoto: /public_html/"
