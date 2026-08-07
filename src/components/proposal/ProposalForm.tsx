@@ -87,6 +87,7 @@ export function ProposalForm({
             <Field
               id="companyName"
               label="Nome da empresa"
+              placeholder="Digite o nome da empresa do cliente"
               value={data.companyName}
               onChange={(value) => onChange("companyName", value)}
               required
@@ -95,6 +96,7 @@ export function ProposalForm({
             <Field
               id="contactName"
               label="Responsável"
+              placeholder="Nome do responsável"
               value={data.contactName}
               onChange={(value) => onChange("contactName", value)}
               required
@@ -306,12 +308,14 @@ export function ProposalForm({
 function Field({
   id,
   label,
+  placeholder,
   value,
   onChange,
   required,
 }: {
   id: string;
   label: string;
+  placeholder?: string;
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
@@ -326,6 +330,7 @@ function Field({
         id={id}
         type="text"
         value={value}
+        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         className="field-input"
         required={required}
