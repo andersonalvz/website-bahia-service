@@ -1,0 +1,31 @@
+# Apache — Next.js static export (HostGator)
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Força HTTPS (descomente se o domínio já tiver SSL ativo)
+  # RewriteCond %{HTTPS} !=on
+  # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Arquivos e pastas reais seguem normais
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # /proposta → proposta.html (e demais rotas do export)
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+?)/?$ $1.html [L]
+</IfModule>
+
+# Cache leve para assets versionados do Next
+<IfModule mod_headers.c>
+  <FilesMatch "\.(ico|png|jpg|jpeg|gif|svg|webp|woff2)$">
+    Header set Cache-Control "public, max-age=604800, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(html|txt|webmanifest|json)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>

@@ -78,10 +78,27 @@ npm start
 - Imagens via `next/image` com `images.unoptimized: true` (necessário na exportação estática)
 - Formulário de contato e gerador de propostas funcionam 100% no navegador
 
-## Deploy
+## Deploy (GitHub Actions → HostGator FTP)
 
-Configure o projeto apontando para este repositório:
+Pipeline: `.github/workflows/deploy.yml` (dispara em push na `main`).
 
-`https://github.com/andersonalvz/website-bahia-service`
+### Secrets do repositório
 
-Publique o conteúdo da pasta `out/` no servidor ou CDN do site institucional.
+| Secret | Obrigatório | Descrição |
+|--------|-------------|-----------|
+| `FTP_SERVER` | sim | Host FTP (ex.: `ftp.bahiaservice.com.br`) |
+| `FTP_USERNAME` | sim | Usuário FTP |
+| `FTP_PASSWORD` | sim | Senha FTP |
+| `FTP_PORT` | não | Padrão `21` |
+| `FTP_SERVER_DIR` | não* | Pasta remota relativa ao login FTP |
+
+\* **Importante (HostGator):** o valor padrão do workflow é `./`
+
+- Se o FTP **já entra em `public_html`** → use `./` (padrão)
+- Se o FTP **entra na home da conta** → use `public_html/`
+- Evite `/public_html/` com barra inicial quando o usuário já está em `public_html` — o upload “funciona”, mas **não atualiza o site**
+
+Após o deploy, o Actions verifica `https://www.bahiaservice.com.br/deploy-version.txt`.  
+Se o SHA do commit não aparecer lá, o job **falha** (FTP foi para a pasta errada).
+
+Repositório: `https://github.com/andersonalvz/website-bahia-service`

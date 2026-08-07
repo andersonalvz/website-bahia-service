@@ -1,7 +1,17 @@
 # CI/CD — Site institucional Bahia Service (Next.js static export → HostGator FTP)
 #
-# Pré-requisitos (Repository Secrets):
-#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_PORT
+# Secrets obrigatórios:
+#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD
+#
+# Secrets/vars opcionais:
+#   FTP_PORT          (padrão: 21)
+#   FTP_SERVER_DIR    (padrão: ./)  ← caminho relativo ao login FTP
+#   PRODUCTION_URL    (padrão: https://www.bahiaservice.com.br)
+#
+# HostGator — escolha de FTP_SERVER_DIR:
+#   - FTP já entra em public_html  → use ./
+#   - FTP entra na home da conta   → use public_html/
+#   NÃO use /public_html/ (barra inicial) se o usuário FTP já estiver em public_html.
 #
 # Build: next.config.ts → output: "export" → pasta `out/`
 
@@ -20,6 +30,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://www.bahiaservice.com.br' }}
+
 jobs:
   build-and-deploy:
     name: Build & Deploy to public_html
@@ -33,7 +46,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Next.js 15 — Node 20 LTS (estável em CI; evita Node 24 experimental)
           node-version: "20"
           cache: npm
 
@@ -41,47 +53,57 @@ jobs:
         run: |
           set -euo pipefail
           if [ -f package-lock.json ]; then
-            echo "✅ package-lock.json encontrado — usando npm ci"
             npm ci
           else
-            echo "⚠️ package-lock.json ausente — usando npm install"
             npm install
           fi
 
       - name: Build (static export)
         run: |
           set -euo pipefail
-          echo "🏗️ Executando npm run build (next build --turbopack + output: export)"
           npm run build
 
-      - name: Detect export directory
-        id: export_dir
+      - name: Stamp deploy version
         run: |
           set -euo pipefail
-
-          echo "🔎 Procurando diretório de exportação estática..."
-
-          if [ -d "out" ] && [ -f "out/index.html" ]; then
-            DIR="out"
-          elif [ -d "dist" ] && [ -f "dist/index.html" ]; then
-            DIR="dist"
-          elif [ -d "build" ] && [ -f "build/index.html" ]; then
-            DIR="build"
-          else
-            echo "❌ Nenhum diretório de export válido encontrado (out/dist/build com index.html)."
-            echo "Conteúdo do workspace:"
+          if [ ! -d out ] || [ ! -f out/index.html ]; then
+            echo "❌ Pasta out/ inválida após o build"
             ls -la
             exit 1
           fi
+          {
+            echo "${{ github.sha }}"
+            echo "${{ github.ref_name }}"
+            date -u +%Y-%m-%dT%H:%M:%SZ
+          } > out/deploy-version.txt
+          echo "📝 deploy-version.txt:"
+          cat out/deploy-version.txt
+          echo "📦 Conteúdo de out/:"
+          ls -la out | head -40
 
-          echo "✅ Diretório detectado: ${DIR}/"
+      - name: Resolve FTP server directory
+        id: ftpdir
+        env:
+          # Preferir secret; se vazio, usar ./ (FTP já dentro de public_html — caso HostGator mais comum)
+          RAW_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        run: |
+          set -euo pipefail
+          DIR="${RAW_DIR:-./}"
+
+          # Valor antigo do workflow (/public_html/) costuma NÃO atualizar o site
+          # quando o usuário FTP da HostGator já inicia dentro de public_html.
+          if [ "$DIR" = "/public_html" ] || [ "$DIR" = "/public_html/" ]; then
+            echo "⚠️ FTP_SERVER_DIR=/public_html/ detectado — convertendo para ./ (corrige deploy fantasma)."
+            echo "   Se o FTP entrar na HOME da conta (não em public_html), defina o secret como: public_html/"
+            DIR="./"
+          fi
+
+          case "$DIR" in
+            */) ;;
+            *) DIR="${DIR}/" ;;
+          esac
           echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
-          echo "local_dir=./${DIR}/" >> "$GITHUB_OUTPUT"
-
-          echo "📦 Conteúdo de ${DIR}/:"
-          ls -la "${DIR}"
-          echo "📊 Tamanho:"
-          du -sh "${DIR}" "${DIR}/_next" "${DIR}/images" 2>/dev/null || true
+          echo "📁 FTP server-dir resolvido: '${DIR}'"
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -89,18 +111,13 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          # Pasta gerada pelo Next.js static export (detectada no passo anterior)
-          local-dir: ${{ steps.export_dir.outputs.local_dir }}
-          # Destino na hospedagem compartilhada HostGator
-          server-dir: /public_html/
-          # NÃO limpar a pasta remota inteira (preserva cgi-bin, .htaccess, etc.)
+          port: ${{ secrets.FTP_PORT || 21 }}
+          local-dir: ./out/
+          server-dir: ${{ steps.ftpdir.outputs.dir }}
           dangerous-clean-slate: false
-          # HostGator costuma usar certificados que falham em modo strict
           security: loose
-          # Upload grande (imagens do site ~25MB+) — timeout generoso
           timeout: 600000
-          log-level: standard
+          log-level: verbose
           exclude: |
             **/.git*
             **/.git*/**
@@ -108,15 +125,53 @@ jobs:
             **/.DS_Store
             **/cgi-bin/**
             **/.well-known/**
-            .htaccess
             error_log
             **/error_log
 
-      - name: Deploy summary
-        if: success()
+      - name: Verify production received this commit
+        id: verify
+        continue-on-error: true
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          SITE_URL: ${{ env.PRODUCTION_URL }}
         run: |
-          echo "✅ Deploy concluído com sucesso"
+          set -euo pipefail
+          echo "🔍 Verificando ${SITE_URL}/deploy-version.txt"
+          echo "SHA esperado: ${EXPECTED_SHA}"
+
+          # HostGator / DNS podem atrasar alguns segundos
+          for attempt in 1 2 3 4 5 6; do
+            echo "Tentativa ${attempt}..."
+            if BODY=$(curl -fsSL --max-time 20 "${SITE_URL}/deploy-version.txt" 2>/dev/null); then
+              echo "Conteúdo remoto:"
+              echo "$BODY"
+              if echo "$BODY" | head -n1 | grep -q "${EXPECTED_SHA}"; then
+                echo "✅ Deploy confirmado no site público"
+                exit 0
+              fi
+              echo "⚠️ Arquivo existe, mas SHA diferente (deploy pode ter ido para outra pasta FTP)"
+            else
+              echo "⚠️ deploy-version.txt ainda não acessível em ${SITE_URL}"
+            fi
+            sleep 10
+          done
+
+          echo "::error::O Actions fez upload FTP, mas o site público NÃO serve este commit."
+          echo "Causa mais comum na HostGator: FTP_SERVER_DIR errado."
+          echo "  - Se o FTP já abre dentro de public_html → defina o secret FTP_SERVER_DIR como ./"
+          echo "  - Se o FTP abre na home da conta → defina FTP_SERVER_DIR como public_html/"
+          echo "Site ainda parece servir a versão antiga de 05/08 (manual)."
+          exit 1
+
+      - name: Deploy summary
+        if: always()
+        run: |
           echo "Branch: ${{ github.ref_name }}"
           echo "Commit: ${{ github.sha }}"
-          echo "Artefato local: ${{ steps.export_dir.outputs.local_dir }}"
-          echo "Destino remoto: /public_html/"
+          echo "FTP server-dir: ${{ steps.ftpdir.outputs.dir }}"
+          echo "Production URL: ${{ env.PRODUCTION_URL }}"
+          echo "Verify result: ${{ steps.verify.outcome }}"
+
+      - name: Fail job if production was not updated
+        if: steps.verify.outcome != 'success'
+        run: exit 1
