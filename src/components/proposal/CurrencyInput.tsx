@@ -29,7 +29,7 @@ export function CurrencyInput({
         inputMode="numeric"
         value={formatCurrencyInput(value)}
         onChange={(event) => onChange(parseCurrencyInput(event.target.value))}
-        className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-bs-secondary focus:ring-2 focus:ring-bs-secondary/20"
+        className="field-input min-w-0"
       />
     </div>
   );

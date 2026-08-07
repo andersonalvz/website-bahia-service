@@ -24,7 +24,7 @@ export function ProposalService({
   return (
     <section className="proposal-service space-y-5">
       <div className="overflow-hidden rounded-2xl">
-        <div className="relative aspect-[21/9] w-full bg-slate-100">
+        <div className="relative aspect-[4/3] w-full bg-slate-100 sm:aspect-[16/9] lg:aspect-[21/9]">
           <Image
             src={image}
             alt={title}
@@ -34,17 +34,17 @@ export function ProposalService({
             sizes="(max-width: 768px) 100vw, 700px"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-bs-primary/70 via-bs-primary/20 to-transparent" />
-          <div className="absolute bottom-4 left-4 right-4 flex items-end gap-3 text-white">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
+          <div className="absolute bottom-3 left-3 right-3 flex items-end gap-2.5 text-white sm:bottom-4 sm:left-4 sm:right-4 sm:gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm sm:h-10 sm:w-10">
               <ServiceIcon name={icon} className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 sm:text-[11px]">
                 {serviceLabels.length > 1
                   ? "Serviços propostos"
                   : "Serviço proposto"}
               </p>
-              <h2 className="font-display text-xl font-bold leading-tight sm:text-2xl">
+              <h2 className="font-display text-lg font-bold leading-tight break-words sm:text-xl md:text-2xl">
                 {title}
               </h2>
             </div>

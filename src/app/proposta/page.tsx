@@ -14,29 +14,26 @@ export default function PropostaPage() {
   return (
     <div className="min-h-screen">
       <header className="app-chrome no-print border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 lg:px-6">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3.5 lg:px-6 2xl:max-w-[90rem]">
+          <div className="flex min-w-0 items-center gap-3">
             <Image
               src={BRAND.logo}
               alt={BRAND.name}
               width={140}
               height={44}
-              className="h-10 w-auto object-contain"
+              className="h-9 w-auto shrink-0 object-contain sm:h-10"
               priority
             />
-            <div className="hidden border-l border-slate-200 pl-3 sm:block">
+            <div className="hidden min-w-0 border-l border-slate-200 pl-3 md:block">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bs-secondary">
                 Área interna
               </p>
-              <p className="text-sm font-medium text-bs-primary">
+              <p className="truncate text-sm font-medium text-bs-primary">
                 Gerador de Propostas Comerciais
               </p>
             </div>
           </div>
 
-          <p className="text-xs text-slate-500 sm:text-sm">
-            Sem login · Funciona no navegador
-          </p>
         </div>
       </header>
 

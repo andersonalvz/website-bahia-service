@@ -58,8 +58,8 @@ export function ProposalForm({
   }
 
   return (
-    <aside className="no-print flex h-full flex-col">
-      <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_10px_40px_rgba(27,54,93,0.06)] sm:p-6">
+    <aside className="no-print flex h-full flex-col md:sticky md:top-4 md:max-h-[calc(100vh-2rem)] md:self-start">
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_10px_40px_rgba(27,54,93,0.06)] sm:p-6 md:max-h-[calc(100vh-2rem)] md:overflow-y-auto">
         <div className="mb-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-bs-secondary">
             Gerador
@@ -100,7 +100,7 @@ export function ProposalForm({
               required
             />
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
               <Field
                 id="city"
                 label="Cidade"
@@ -121,7 +121,7 @@ export function ProposalForm({
                   type="date"
                   value={data.date}
                   onChange={(event) => onChange("date", event.target.value)}
-                  className="field-input"
+                  className="field-input min-w-0"
                   required
                 />
               </div>
@@ -129,14 +129,14 @@ export function ProposalForm({
           </fieldset>
 
           <fieldset className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <legend className="text-sm font-semibold text-bs-primary">
                 Serviços
               </legend>
               <button
                 type="button"
                 onClick={addServiceLine}
-                className="inline-flex min-h-10 items-center rounded-full bg-bs-primary/5 px-3 py-2 text-xs font-semibold text-bs-primary transition hover:bg-bs-primary/10"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-full bg-bs-primary/5 px-3 py-2 text-xs font-semibold text-bs-primary transition hover:bg-bs-primary/10 sm:w-auto"
               >
                 + Adicionar serviço
               </button>
@@ -148,16 +148,18 @@ export function ProposalForm({
                   key={line.id}
                   className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="min-w-0 text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Serviço {index + 1}
-                      {index === 0 ? " · imagem principal" : ""}
+                      {index === 0 ? (
+                        <span className="text-slate-400"> · principal</span>
+                      ) : null}
                     </p>
                     {data.services.length > 1 ? (
                       <button
                         type="button"
                         onClick={() => removeServiceLine(line.id)}
-                        className="inline-flex min-h-10 items-center px-2 text-xs font-medium text-red-600 hover:text-red-700"
+                        className="inline-flex min-h-10 shrink-0 items-center px-2 text-xs font-medium text-red-600 hover:text-red-700"
                       >
                         Remover
                       </button>
@@ -192,7 +194,7 @@ export function ProposalForm({
                     </select>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
                     <div className="space-y-1.5">
                       <label
                         htmlFor={`positions-${line.id}`}
@@ -214,7 +216,7 @@ export function ProposalForm({
                             Number(event.target.value) || 0
                           )
                         }
-                        className="field-input"
+                        className="field-input min-w-0"
                         required
                       />
                     </div>
@@ -270,7 +272,7 @@ export function ProposalForm({
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-bs-secondary">
               Cálculo automático
             </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
               <TotalCard label="Valor mensal" value={totals.monthlyValue} />
               <TotalCard label="Valor anual" value={totals.annualValue} />
             </div>
@@ -322,9 +324,9 @@ function Field({
 
 function TotalCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl bg-white/80 px-3.5 py-3 ring-1 ring-slate-200/80">
+    <div className="min-w-0 rounded-xl bg-white/80 px-3.5 py-3 ring-1 ring-slate-200/80">
       <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-0.5 font-display text-lg font-bold text-bs-primary">
+      <p className="mt-0.5 break-words font-display text-base font-bold text-bs-primary sm:text-lg">
         {formatCurrency(value)}
       </p>
     </div>

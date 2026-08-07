@@ -17,23 +17,23 @@ export function ProposalHeader({
 }: ProposalHeaderProps) {
   return (
     <header className="proposal-header border-b border-slate-200 pb-6">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+        <div className="flex min-w-0 items-center gap-4">
           <Image
             src={BRAND.logo}
             alt={BRAND.name}
             width={180}
             height={56}
-            className="h-14 w-auto object-contain"
+            className="h-12 w-auto max-w-full object-contain sm:h-14"
             priority
           />
         </div>
 
-        <div className="text-left sm:text-right">
+        <div className="min-w-0 text-left sm:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-bs-secondary">
             Documento comercial
           </p>
-          <h1 className="mt-1 font-display text-2xl font-bold tracking-tight text-bs-primary sm:text-3xl">
+          <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-bs-primary sm:text-2xl md:text-3xl">
             Proposta Comercial
           </h1>
           <p className="mt-1 text-sm text-slate-500">{BRAND.tagline}</p>
