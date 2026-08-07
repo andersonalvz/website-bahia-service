@@ -1,21 +1,18 @@
 /**
- * Motor de impressão/PDF da proposta comercial.
+ * Motor de impressão/PDF — mesmo documento A4 no desktop, tablet e mobile.
  *
- * Arquitetura (causa das falhas anteriores):
- * - NÃO reutiliza o @media print da página (regras conflitantes + page-breaks).
- * - Gera um documento isolado em iframe com CSS próprio de paginação.
- * - Embute imagens como JPEG data URL a partir dos <img> já decodificados na tela
- *   (confiável em Safari iOS/iPadOS; URLs externas/relativas falham no print).
- *
- * Limitação de rodapé (Chrome / Edge / Safari):
- * Headers/footers nativos (data, URL, título) NÃO são controláveis via JS/CSS.
- * O usuário deve desmarcar “Cabeçalhos e rodapés” no diálogo de impressão.
- * Contadores CSS @page (@bottom-center) funcionam em Firefox; Chromium ignora.
+ * Estratégia:
+ * 1. Iframe com viewport 794px (layout desktop, independente do aparelho).
+ * 2. Todas as <img> viram JPEG data URL (bitmap embutido) — Safari iOS não
+ *    confia em URLs relativas no print do iframe.
+ * 3. Foto do serviço também vira background-image no hero (fallback WebKit).
+ * 4. CSS de paginação próprio (sem page-break-after nos logos).
  */
 
 const PRINT_WIDTH_PX = 794;
 const PRINT_IMAGE_MAX_W = 1400;
 const PRINT_JPEG_QUALITY = 0.85;
+const SERVICE_HERO_PRINT_HEIGHT_PX = 240;
 
 function escapeHtml(value: string): string {
   return value
@@ -33,13 +30,14 @@ function toAbsoluteUrl(src: string): string {
   }
 }
 
-/** Desenha um HTMLImageElement já carregado em JPEG data URL. */
 function rasterizeImage(
-  img: HTMLImageElement,
+  img: CanvasImageSource & { width?: number; height?: number; naturalWidth?: number; naturalHeight?: number },
   maxWidth = PRINT_IMAGE_MAX_W
 ): string | null {
-  const naturalW = img.naturalWidth || img.width;
-  const naturalH = img.naturalHeight || img.height;
+  const naturalW =
+    ("naturalWidth" in img && img.naturalWidth) || img.width || 0;
+  const naturalH =
+    ("naturalHeight" in img && img.naturalHeight) || img.height || 0;
   if (!naturalW || !naturalH) return null;
 
   const scale = Math.min(1, maxWidth / naturalW);
@@ -54,104 +52,171 @@ function rasterizeImage(
 
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
-  ctx.drawImage(img, 0, 0, width, height);
+  ctx.drawImage(img as CanvasImageSource, 0, 0, width, height);
   return canvas.toDataURL("image/jpeg", PRINT_JPEG_QUALITY);
 }
 
-async function loadAndRasterize(src: string): Promise<string> {
+async function fetchAsDataUrl(src: string): Promise<string> {
   const absolute = toAbsoluteUrl(src);
-  const img = new Image();
-  img.decoding = "async";
-  await new Promise<void>((resolve, reject) => {
-    img.onload = () => resolve();
-    img.onerror = () => reject(new Error(`Falha ao carregar ${absolute}`));
-    img.src = absolute;
-  });
+
+  // 1) fetch → blob → createImageBitmap (mais confiável no iOS)
+  try {
+    const res = await fetch(absolute, { cache: "force-cache" });
+    if (res.ok) {
+      const blob = await res.blob();
+      if (typeof createImageBitmap === "function") {
+        const bitmap = await createImageBitmap(blob);
+        const dataUrl = rasterizeImage(bitmap);
+        bitmap.close();
+        if (dataUrl) return dataUrl;
+      }
+      // Fallback: FileReader
+      const readerData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+      // Re-rasteriza via Image se for PNG grande
+      if (readerData.startsWith("data:image")) {
+        const img = await loadHtmlImage(readerData);
+        return rasterizeImage(img) ?? readerData;
+      }
+      return readerData;
+    }
+  } catch {
+    // continua para Image()
+  }
+
+  const img = await loadHtmlImage(absolute);
   return rasterizeImage(img) ?? absolute;
 }
 
+function loadHtmlImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Falha ao carregar ${src}`));
+    img.src = src;
+  });
+}
+
+async function resolveDataUrl(
+  rawSrc: string,
+  liveImg?: HTMLImageElement | null
+): Promise<string> {
+  if (rawSrc.startsWith("data:")) return rawSrc;
+
+  if (
+    liveImg &&
+    liveImg.complete &&
+    (liveImg.naturalWidth > 0 || liveImg.width > 0)
+  ) {
+    const fromLive = rasterizeImage(liveImg);
+    if (fromLive) return fromLive;
+  }
+
+  try {
+    return await fetchAsDataUrl(rawSrc);
+  } catch {
+    return toAbsoluteUrl(rawSrc);
+  }
+}
+
 /**
- * Substitui src de cada <img> do clone por data URL,
- * preferindo o bitmap já decodificado no documento ao vivo.
+ * Embute todas as imagens do clone como data URL e reforça a foto do serviço
+ * com background-image (mesmo resultado no mobile e no desktop).
  */
-async function inlineImages(
+async function preparePrintClone(
   liveRoot: HTMLElement,
   cloneRoot: HTMLElement
 ): Promise<void> {
   const liveImgs = Array.from(liveRoot.querySelectorAll("img"));
   const cloneImgs = Array.from(cloneRoot.querySelectorAll("img"));
 
+  const liveBySrc = new Map<string, HTMLImageElement>();
+  for (const img of liveImgs) {
+    const key = img.currentSrc || img.getAttribute("src") || "";
+    if (key) liveBySrc.set(key, img);
+    try {
+      liveBySrc.set(toAbsoluteUrl(key), img);
+    } catch {
+      /* ignore */
+    }
+  }
+
   await Promise.all(
     cloneImgs.map(async (cloneImg, index) => {
-      const liveImg = liveImgs[index];
       const rawSrc =
         cloneImg.getAttribute("src") ||
-        liveImg?.currentSrc ||
-        liveImg?.getAttribute("src") ||
+        liveImgs[index]?.currentSrc ||
+        liveImgs[index]?.getAttribute("src") ||
         "";
-
       if (!rawSrc) return;
 
-      let dataUrl: string | null = null;
+      const liveMatch =
+        liveBySrc.get(rawSrc) ||
+        liveBySrc.get(toAbsoluteUrl(rawSrc)) ||
+        liveImgs[index] ||
+        null;
 
-      if (
-        liveImg &&
-        liveImg.complete &&
-        (liveImg.naturalWidth > 0 || liveImg.width > 0)
-      ) {
-        dataUrl = rasterizeImage(liveImg);
-      }
-
-      if (!dataUrl) {
-        try {
-          dataUrl = await loadAndRasterize(rawSrc);
-        } catch {
-          dataUrl = toAbsoluteUrl(rawSrc);
-        }
-      }
+      const dataUrl = await resolveDataUrl(rawSrc, liveMatch);
 
       cloneImg.setAttribute("src", dataUrl);
       cloneImg.removeAttribute("srcset");
       cloneImg.removeAttribute("sizes");
       cloneImg.removeAttribute("loading");
-      cloneImg.removeAttribute("decoding");
-      // next/image fill: tira do absolute para o fluxo de impressão
       cloneImg.style.cssText = [
         "display:block",
         "position:static",
         "width:100%",
         "height:auto",
         "max-width:100%",
-        "object-fit:contain",
+        "object-fit:cover",
+        "object-position:center",
         "-webkit-print-color-adjust:exact",
         "print-color-adjust:exact",
       ].join(";");
+
+      // Reforço WebKit: hero do serviço com background + altura explícita
+      if (
+        cloneImg.classList.contains("service-hero-image") ||
+        cloneImg.getAttribute("data-print-image") === "service-hero"
+      ) {
+        const hero = cloneImg.closest(
+          ".proposal-service-hero"
+        ) as HTMLElement | null;
+        if (hero) {
+          hero.style.cssText = [
+            "position:relative",
+            "display:block",
+            "width:100%",
+            `min-height:${SERVICE_HERO_PRINT_HEIGHT_PX}px`,
+            `height:${SERVICE_HERO_PRINT_HEIGHT_PX}px`,
+            `background-image:url("${dataUrl}")`,
+            "background-size:cover",
+            "background-position:center",
+            "background-repeat:no-repeat",
+            "-webkit-print-color-adjust:exact",
+            "print-color-adjust:exact",
+            "overflow:hidden",
+          ].join(";");
+          cloneImg.style.cssText = [
+            "display:block",
+            "position:absolute",
+            "inset:0",
+            "width:100%",
+            "height:100%",
+            "object-fit:cover",
+            "opacity:1",
+            "-webkit-print-color-adjust:exact",
+            "print-color-adjust:exact",
+          ].join(";");
+        }
+      }
     })
   );
-
-  // next/image wrapping: remove wrappers que forçam altura 0 / absolute
-  cloneRoot.querySelectorAll("[style*='position:absolute']").forEach((node) => {
-    if (node instanceof HTMLElement && node.tagName !== "IMG") {
-      const img = node.querySelector("img");
-      if (img && node.parentElement) {
-        node.replaceWith(img);
-      }
-    }
-  });
-
-  // Container fill do Next (span com position relative + img absolute)
-  cloneRoot
-    .querySelectorAll(".clients-logos-frame, .proposal-service-hero")
-    .forEach((frame) => {
-      const img = frame.querySelector("img");
-      if (!img) return;
-      // Garante img no fluxo; remove spans vazios de layout do Next
-      frame.querySelectorAll("span").forEach((span) => {
-        if (!span.querySelector("img") && span.textContent?.trim() === "") {
-          span.remove();
-        }
-      });
-    });
 }
 
 function collectAppStylesheets(): string {
@@ -162,15 +227,12 @@ function collectAppStylesheets(): string {
     .join("\n");
 }
 
-/** Overrides aplicados por cima do CSS da app (paginação + imagens). */
 function buildPrintOverrideStylesheet(): string {
   return `
     @page {
       size: A4;
       margin: 12mm 12mm 16mm;
     }
-
-    /* Firefox: número da página no rodapé. Chromium/Safari ignoram. */
     @page {
       @bottom-center {
         content: counter(page) "/" counter(pages);
@@ -194,7 +256,7 @@ function buildPrintOverrideStylesheet(): string {
       width: 100% !important;
       max-width: none !important;
       margin: 0 !important;
-      padding: 8px 4px !important;
+      padding: 6px 2px !important;
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
@@ -202,62 +264,84 @@ function buildPrintOverrideStylesheet(): string {
       background: #fff !important;
     }
 
-    /* Cabeçalho desktop */
+    .proposal-brand-logo {
+      height: 32px !important;
+      width: auto !important;
+      max-width: 120px !important;
+    }
+    .proposal-doc-title {
+      font-size: 20px !important;
+      line-height: 1.2 !important;
+      white-space: nowrap !important;
+    }
     .proposal-header > div:first-child {
       display: flex !important;
       flex-direction: row !important;
       justify-content: space-between !important;
-      align-items: flex-start !important;
+      align-items: center !important;
+      gap: 12px !important;
     }
-    .proposal-header > div:first-child > div:last-child { text-align: right !important; }
-    .proposal-meta-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; }
+    .proposal-header > div:first-child > div:last-child {
+      text-align: right !important;
+    }
+    .proposal-meta-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+    }
     .proposal-meta-date { text-align: right !important; }
 
-    /* Clientes: SEM page-break-after; SEM altura fixa 150mm */
+    .proposal-cover-hero {
+      margin-top: 12px !important;
+      margin-bottom: 0 !important;
+      overflow: hidden !important;
+      border-radius: 12px !important;
+      break-inside: avoid !important;
+    }
+    .proposal-cover-hero-image {
+      display: block !important;
+      width: 100% !important;
+      height: auto !important;
+      max-height: 55mm !important;
+      aspect-ratio: 21 / 9 !important;
+      object-fit: cover !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
     .proposal-clients {
       break-inside: avoid !important;
       page-break-inside: avoid !important;
       break-after: auto !important;
       page-break-after: auto !important;
     }
-    .clients-logos-frame {
-      overflow: hidden !important;
-    }
     .clients-logos-frame img,
     .clients-logos-image {
       display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
       position: static !important;
       width: 100% !important;
       height: auto !important;
-      max-height: 90mm !important;
+      max-height: 75mm !important;
       object-fit: contain !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
 
-    /* Foto do serviço — sempre no fluxo */
     .proposal-service-hero {
       position: relative !important;
       display: block !important;
       width: 100% !important;
-      height: auto !important;
+      min-height: ${SERVICE_HERO_PRINT_HEIGHT_PX}px !important;
+      height: ${SERVICE_HERO_PRINT_HEIGHT_PX}px !important;
       overflow: hidden !important;
       break-inside: avoid !important;
       page-break-inside: avoid !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
     .service-hero-image {
       display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
-      position: static !important;
-      width: 100% !important;
-      height: auto !important;
-      max-height: 70mm !important;
-      aspect-ratio: 21 / 9 !important;
-      object-fit: cover !important;
-      object-position: center !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
@@ -265,18 +349,15 @@ function buildPrintOverrideStylesheet(): string {
       position: absolute !important;
       inset: 0 !important;
       pointer-events: none !important;
+      z-index: 1 !important;
     }
-    .proposal-service-columns {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
+    .proposal-service-hero > div:last-child {
+      z-index: 2 !important;
     }
 
-    /* Quebras de seção (sem double-break / página vazia) */
     .proposal-finance-page {
       break-before: page !important;
       page-break-before: always !important;
-      break-after: auto !important;
-      page-break-after: auto !important;
     }
     .proposal-sla-page {
       break-before: page !important;
@@ -318,7 +399,7 @@ function waitForCloneImages(doc: Document): Promise<void> {
           const done = () => resolve();
           img.addEventListener("load", done, { once: true });
           img.addEventListener("error", done, { once: true });
-          window.setTimeout(done, 5000);
+          window.setTimeout(done, 6000);
         })
     )
   ).then(() => undefined);
@@ -342,17 +423,15 @@ export async function printProposalDocument(options: {
   }
 
   const clone = source.cloneNode(true) as HTMLElement;
-  await inlineImages(source, clone);
+  await preparePrintClone(source, clone);
 
-  // Marca a imagem de clientes para CSS de print
   const clientsImg = clone.querySelector(".clients-logos-frame img");
-  if (clientsImg) {
-    clientsImg.classList.add("clients-logos-image");
-  }
+  if (clientsImg) clientsImg.classList.add("clients-logos-image");
 
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
   iframe.setAttribute("title", "Impressão da proposta");
+  // Mesmo “canvas” A4 em qualquer aparelho (mobile = desktop)
   iframe.style.cssText = [
     "position:fixed",
     "left:0",
@@ -385,7 +464,7 @@ export async function printProposalDocument(options: {
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=${PRINT_WIDTH_PX}" />
+<meta name="viewport" content="width=${PRINT_WIDTH_PX}, initial-scale=1" />
 <title>${escapeHtml(options.title)}</title>
 ${collectAppStylesheets()}
 <style id="proposal-print-overrides">${buildPrintOverrideStylesheet()}</style>
@@ -398,8 +477,7 @@ ${clone.outerHTML}
 
   try {
     await waitForCloneImages(doc);
-    // WebKit precisa de um frame de pintura com imagens data URL
-    await new Promise((r) => window.setTimeout(r, 500));
+    await new Promise((r) => window.setTimeout(r, 600));
     win.focus();
     win.print();
   } finally {

@@ -4,8 +4,6 @@ import { ServiceIcon } from "./ServiceIcon";
 interface ProposalServiceProps {
   title: string;
   description: string;
-  benefits: string[];
-  differentials: string[];
   image: string;
   icon: ServiceIconName;
   serviceLabels: string[];
@@ -14,8 +12,6 @@ interface ProposalServiceProps {
 export function ProposalService({
   title,
   description,
-  benefits,
-  differentials,
   image,
   icon,
   serviceLabels,
@@ -25,14 +21,14 @@ export function ProposalService({
       <div className="overflow-hidden rounded-2xl">
         <div className="proposal-service-hero relative w-full bg-slate-100">
           {/*
-            img sempre visível no DOM (sem display:none).
-            Safari/iPad não rasteriza no print imagens que estavam hidden na tela.
-            Evita também next/image fill (posição absoluta), instável no print WebKit.
+            img em fluxo + data-src para o motor de print (mobile = desktop).
+            Sem next/image fill (absoluto), que falha no WebKit print.
           */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image}
             alt={title}
+            data-print-image="service-hero"
             className="service-hero-image block aspect-[4/3] h-auto w-full object-cover object-center sm:aspect-[16/9] lg:aspect-[21/9]"
           />
           <div className="proposal-service-hero-overlay absolute inset-0 bg-gradient-to-t from-bs-primary/70 via-bs-primary/20 to-transparent" />
@@ -74,42 +70,6 @@ export function ProposalService({
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
           {description}
         </p>
-      </div>
-
-      <div className="proposal-service-columns grid gap-5 sm:grid-cols-2">
-        <div>
-          <h3 className="font-display text-base font-semibold text-bs-primary">
-            Benefícios
-          </h3>
-          <ul className="mt-2 space-y-2">
-            {benefits.map((benefit) => (
-              <li
-                key={benefit}
-                className="flex gap-2 text-sm leading-relaxed text-slate-600"
-              >
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-bs-secondary" />
-                {benefit}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="font-display text-base font-semibold text-bs-primary">
-            Diferenciais
-          </h3>
-          <ul className="mt-2 space-y-2">
-            {differentials.map((item) => (
-              <li
-                key={item}
-                className="flex gap-2 text-sm leading-relaxed text-slate-600"
-              >
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-bs-primary" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
     </section>
   );

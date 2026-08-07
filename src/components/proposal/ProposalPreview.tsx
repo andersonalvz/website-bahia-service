@@ -57,8 +57,6 @@ export function ProposalPreview({ data, totals }: ProposalPreviewProps) {
         <ProposalService
           title={summary.title}
           description={summary.description}
-          benefits={summary.benefits}
-          differentials={summary.differentials}
           image={summary.image}
           icon={summary.icon}
           serviceLabels={summary.services.map((service) => service.shortTitle)}

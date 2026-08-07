@@ -15,31 +15,43 @@ export function ProposalHeader({
   date,
 }: ProposalHeaderProps) {
   return (
-    <header className="proposal-header border-b border-slate-200 pb-6">
-      <div className="flex flex-col gap-4 print:flex-row print:items-start print:justify-between print:gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-        <div className="flex min-w-0 items-center gap-4">
+    <header className="proposal-header border-b border-slate-200 pb-5">
+      <div className="flex flex-row items-center justify-between gap-3 sm:gap-4">
+        <div className="flex min-w-0 shrink-0 items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            width={180}
-            height={56}
-            className="h-12 w-auto max-w-full object-contain sm:h-14"
+            width={120}
+            height={40}
+            className="proposal-brand-logo h-8 w-auto max-w-[120px] object-contain sm:h-9"
           />
         </div>
 
-        <div className="min-w-0 text-left print:text-right sm:text-right">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-bs-secondary">
+        <div className="min-w-0 flex-1 text-right">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-bs-secondary sm:text-[11px]">
             Documento comercial
           </p>
-          <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-bs-primary print:text-3xl sm:text-2xl md:text-3xl">
+          <h1 className="proposal-doc-title mt-0.5 font-display text-lg font-bold leading-tight tracking-tight text-bs-primary whitespace-nowrap sm:text-xl md:text-2xl">
             Proposta Comercial
           </h1>
-          <p className="mt-1 text-sm text-slate-500">{BRAND.tagline}</p>
+          <p className="mt-0.5 text-xs leading-snug text-slate-500 sm:text-sm">
+            {BRAND.tagline}
+          </p>
         </div>
       </div>
 
-      <div className="proposal-meta-grid mt-6 grid gap-3 rounded-2xl bg-slate-50 p-4 print:grid-cols-2 sm:grid-cols-2">
+      {/* Hero institucional — preenche a página 1 no print e empurra o resumo */}
+      <div className="proposal-cover-hero mt-4 overflow-hidden rounded-2xl bg-slate-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={BRAND.heroPrint}
+          alt={`${BRAND.name} — facilities e serviços corporativos`}
+          className="proposal-cover-hero-image block h-auto w-full object-cover object-center aspect-[21/9] sm:aspect-[2.4/1]"
+        />
+      </div>
+
+      <div className="proposal-meta-grid mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Cliente
@@ -52,7 +64,7 @@ export function ProposalHeader({
             {city ? ` · ${city}` : ""}
           </p>
         </div>
-        <div className="proposal-meta-date print:text-right sm:text-right">
+        <div className="proposal-meta-date text-left sm:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Data
           </p>

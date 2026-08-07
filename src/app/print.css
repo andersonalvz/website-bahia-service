@@ -53,23 +53,45 @@
     page-break-inside: avoid;
   }
 
+  .proposal-cover-hero-image {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 55mm !important;
+    object-fit: cover !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .proposal-brand-logo {
+    height: 32px !important;
+    max-width: 120px !important;
+  }
+
+  .proposal-doc-title {
+    white-space: nowrap !important;
+    font-size: 20px !important;
+  }
+
   .clients-logos-frame img,
   .clients-logos-image {
     display: block !important;
     position: static !important;
     width: 100% !important;
     height: auto !important;
-    max-height: 90mm !important;
+    max-height: 75mm !important;
     object-fit: contain !important;
+  }
+
+  .proposal-service-hero {
+    min-height: 240px !important;
+    height: 240px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .service-hero-image {
     display: block !important;
-    position: static !important;
-    width: 100% !important;
-    height: auto !important;
-    max-height: 70mm !important;
-    object-fit: cover !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }

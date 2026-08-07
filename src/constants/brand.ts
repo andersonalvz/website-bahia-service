@@ -10,6 +10,8 @@ export const BRAND = {
   border: "#E2E8F0",
   logo: "/images/logo-bs.png",
   hero: "/images/company-hero.png",
+  /** Versão otimizada para PDF/print (~355KB). */
+  heroPrint: "/images/company-hero-print.jpg",
   url: "https://www.bahiaservice.com.br",
   contact: {
     phones: ["(71) 99695-5341", "(71) 98769-0447"],
