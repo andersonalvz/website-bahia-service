@@ -20,10 +20,16 @@ DirectoryIndex index.html
   RewriteRule ^(.+?)/?$ $1.html [L]
 </IfModule>
 
-# Cache leve para assets versionados do Next
+# Cache: favicons curtos (Chrome/Safari cacheiam agressivo); demais assets 7 dias
 <IfModule mod_headers.c>
-  <FilesMatch "\.(ico|png|jpg|jpeg|gif|svg|webp|woff2)$">
+  <FilesMatch "\.(jpg|jpeg|gif|webp|woff2)$">
     Header set Cache-Control "public, max-age=604800, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(png|svg|ico)$">
+    Header set Cache-Control "public, max-age=604800, immutable"
+  </FilesMatch>
+  <FilesMatch "^(favicon\.ico|favicon-16x16\.png|favicon-32x32\.png|apple-touch-icon\.png|android-chrome-192x192\.png|android-chrome-512x512\.png|icon\.svg)$">
+    Header set Cache-Control "public, max-age=86400, must-revalidate"
   </FilesMatch>
   <FilesMatch "\.(html|txt|webmanifest|json)$">
     Header set Cache-Control "public, max-age=0, must-revalidate"

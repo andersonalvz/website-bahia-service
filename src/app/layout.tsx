@@ -81,26 +81,28 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Cache-bust (?v=) evita favicon antigo em Chrome/Safari após troca do ícone.
+  // Sem SVG aqui: Safari costuma falhar com SVG complexo como favicon.
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-    other: [
+      { url: "/favicon.ico?v=20260807", sizes: "any" },
       {
-        rel: "android-chrome",
-        url: "/android-chrome-192x192.png",
-        sizes: "192x192",
+        url: "/favicon-16x16.png?v=20260807",
+        sizes: "16x16",
+        type: "image/png",
       },
       {
-        rel: "android-chrome",
-        url: "/android-chrome-512x512.png",
-        sizes: "512x512",
+        url: "/favicon-32x32.png?v=20260807",
+        sizes: "32x32",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/favicon.ico?v=20260807",
+    apple: [
+      {
+        url: "/apple-touch-icon.png?v=20260807",
+        sizes: "180x180",
+        type: "image/png",
       },
     ],
   },

@@ -1,20 +1,18 @@
 /**
  * Motor de impressão A4 — idêntico em desktop, tablet e mobile.
  *
- * Por que mobile saía diferente (ex.: 7 págs vs 4):
- * - O iframe herdava TODO o CSS da app (Tailwind mobile-first + print.css).
- * - No Safari iOS, parte das media queries ainda refletia o viewport do aparelho.
- * - Processamento complexo da foto do serviço (absolute + background) falhava no WebKit.
- *
- * Solução:
- * - Documento isolado com CSS PRÓPRIO (não coleta stylesheets da app).
- * - Viewport fixo 794px (A4 @ 96dpi).
- * - Imagens estáticas embutidas como JPEG data URL (capa, serviço, logos, marca).
+ * Foto do serviço no iOS: overlays absolute (gradiente + título) sobre a img
+ * fazem o WebKit print colapsar a altura da imagem (capa funciona porque é
+ * só <img> em fluxo). No clone de print, o hero do serviço é normalizado
+ * para o mesmo padrão da capa: imagem estática em fluxo, sem absolute.
  */
+
+import { SERVICE_SECTION_IMAGE } from "@/data/services";
 
 const PRINT_WIDTH_PX = 794;
 const PRINT_IMAGE_MAX_W = 1400;
 const PRINT_JPEG_QUALITY = 0.82;
+const SERVICE_PRINT_HEIGHT_PX = 200;
 
 function escapeHtml(value: string): string {
   return value
@@ -83,6 +81,54 @@ async function embedImages(cloneRoot: HTMLElement): Promise<void> {
       }
     })
   );
+}
+
+/**
+ * Normaliza o hero do serviço para o padrão da capa (img em fluxo).
+ * Remove overlays absolute que quebram o print no Safari iOS.
+ */
+async function normalizeServiceHeroForPrint(cloneRoot: HTMLElement): Promise<void> {
+  const hero = cloneRoot.querySelector(".proposal-service-hero");
+  if (!hero) return;
+
+  const title =
+    hero.querySelector("h2")?.textContent?.trim() || "Serviço proposto";
+  const label =
+    hero.querySelector("p")?.textContent?.trim() || "Serviço proposto";
+
+  let dataUrl: string;
+  try {
+    dataUrl = await toDataUrl(SERVICE_SECTION_IMAGE);
+  } catch {
+    dataUrl = toAbsoluteUrl(SERVICE_SECTION_IMAGE);
+  }
+
+  const wrapper = hero.parentElement; // overflow-hidden rounded wrapper
+  const section = wrapper?.parentElement; // .proposal-service
+
+  const img = document.createElement("img");
+  img.className = "service-hero-image";
+  img.alt = title;
+  img.src = dataUrl;
+  img.setAttribute("width", "1200");
+  img.setAttribute("height", String(SERVICE_PRINT_HEIGHT_PX));
+
+  const newHero = document.createElement("div");
+  newHero.className = "proposal-service-hero";
+  newHero.appendChild(img);
+
+  const caption = document.createElement("div");
+  caption.className = "service-print-caption";
+  caption.innerHTML = `<p>${escapeHtml(label)}</p><h2>${escapeHtml(title)}</h2>`;
+
+  // Substitui o bloco antigo (wrapper+hero com overlays) por hero simples + legenda
+  if (wrapper && section) {
+    wrapper.replaceWith(newHero);
+    newHero.after(caption);
+  } else {
+    hero.replaceWith(newHero);
+    newHero.after(caption);
+  }
 }
 
 /** CSS autocontido — única fonte de layout do PDF. */
@@ -250,69 +296,59 @@ function buildPrintDocumentCss(): string {
       margin: 0 auto;
     }
 
-    /* —— Serviço (foto estática, fluxo simples como a capa) —— */
+    /* —— Serviço: MESMO padrão da capa (img em fluxo, sem absolute) —— */
     .proposal-service { margin: 16px 0; }
-    .proposal-service > div:first-child {
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
     .proposal-service-hero {
-      position: relative;
       display: block;
       width: 100%;
+      margin: 0 0 8px;
+      border-radius: 10px;
+      overflow: hidden;
       background: #e2e8f0;
       break-inside: avoid;
       page-break-inside: avoid;
     }
     .service-hero-image {
-      display: block;
-      width: 100%;
-      height: auto;
-      max-height: 55mm;
-      object-fit: cover;
-      object-position: center;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: static !important;
+      width: 100% !important;
+      height: ${SERVICE_PRINT_HEIGHT_PX}px !important;
+      max-height: none !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
-    .proposal-service-hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(27,54,93,0.75), rgba(27,54,93,0.2), transparent);
-      pointer-events: none;
+    .service-print-caption {
+      margin: 0 0 12px;
     }
-    .proposal-service-hero > div:last-child {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 10px;
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      color: #fff;
-      z-index: 1;
-    }
-    .proposal-service-hero h2 {
-      margin: 0;
-      font-size: 18px;
-      color: #fff;
-      line-height: 1.2;
-    }
-    .proposal-service-hero p {
+    .service-print-caption p {
       margin: 0;
       font-size: 10px;
+      font-weight: 600;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.85);
+      color: #3d85c6;
+    }
+    .service-print-caption h2 {
+      margin: 4px 0 0;
+      font-size: 18px;
+      color: #1b365d;
+      line-height: 1.2;
     }
     .proposal-service h3 {
       margin: 0 0 6px;
       font-size: 15px;
       color: #1b365d;
     }
-    .proposal-service > div:last-child p {
-      margin: 0;
+    .proposal-service-description p {
+      margin: 0 0 8px;
       color: #475569;
       font-size: 12px;
     }
+    .proposal-service-description p:last-child { margin-bottom: 0; }
 
     /* —— Financeiro —— */
     .proposal-finance-page {
@@ -478,9 +514,10 @@ export async function printProposalDocument(options: {
   }
 
   const clone = source.cloneNode(true) as HTMLElement;
-  // Remove chips / elementos só de tela se existirem
   clone.querySelectorAll(".no-print").forEach((el) => el.remove());
 
+  // Foto do serviço PRIMEIRO (caminho estático), no padrão da capa — crítico no iOS
+  await normalizeServiceHeroForPrint(clone);
   await embedImages(clone);
 
   const iframe = document.createElement("iframe");

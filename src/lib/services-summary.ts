@@ -23,6 +23,9 @@ export function getSelectedServices(
   return services;
 }
 
+const SERVICE_EXTRA_PARAGRAPH =
+  "A Bahia Service estrutura a operação com planejamento de escala, supervisão contínua e indicadores de qualidade, garantindo padronização, segurança e atendimento alinhado às necessidades do cliente durante toda a vigência do contrato.";
+
 /** Resume título/descrição dos serviços selecionados (foto única estática). */
 export function summarizeServices(lines: ProposalServiceLine[]) {
   const services = getSelectedServices(lines);
@@ -32,10 +35,12 @@ export function summarizeServices(lines: ProposalServiceLine[]) {
   const title =
     titles.length <= 1 ? primary.title : joinList(titles);
 
-  const description =
+  const baseDescription =
     services.length <= 1
       ? primary.description
       : `Esta proposta contempla os serviços de ${joinList(titles)}. A Bahia Service disponibiliza profissionais qualificados para a execução integrada dessas frentes, com supervisão operacional, padronização de processos e foco em qualidade, segurança e eficiência para o cliente.`;
+
+  const description = `${baseDescription}\n\n${SERVICE_EXTRA_PARAGRAPH}`;
 
   return {
     primary,

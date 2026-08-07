@@ -47,7 +47,7 @@ export function ProposalService({
       </div>
 
       {serviceLabels.length > 1 ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="no-print flex flex-wrap gap-2">
           {serviceLabels.map((label) => (
             <span
               key={label}
@@ -59,13 +59,24 @@ export function ProposalService({
         </div>
       ) : null}
 
-      <div>
+      <div className="proposal-service-description">
         <h3 className="font-display text-lg font-semibold text-bs-primary">
           Descrição do serviço
         </h3>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          {description}
-        </p>
+        <div className="mt-2 space-y-3">
+          {description
+            .split(/\n\n+/)
+            .map((paragraph) => paragraph.trim())
+            .filter(Boolean)
+            .map((paragraph) => (
+              <p
+                key={paragraph.slice(0, 48)}
+                className="text-sm leading-relaxed text-slate-600"
+              >
+                {paragraph}
+              </p>
+            ))}
+        </div>
       </div>
     </section>
   );
