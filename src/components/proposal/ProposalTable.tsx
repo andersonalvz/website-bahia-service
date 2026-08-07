@@ -24,16 +24,20 @@ export function ProposalTable({
         Valores estimados com base nos parâmetros informados nesta proposta.
       </p>
 
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 [-webkit-overflow-scrolling:touch]">
-        <table className="w-full min-w-[280px] text-xs sm:min-w-0 sm:text-sm">
+      <div className="table-scroll mt-4 overflow-x-auto rounded-2xl border border-slate-200 print:overflow-visible [-webkit-overflow-scrolling:touch]">
+        <table className="w-full min-w-[280px] text-xs print:min-w-0 print:text-sm sm:min-w-0 sm:text-sm">
           <thead>
             <tr className="bg-bs-primary text-left text-white">
-              <th className="px-2 py-2.5 font-medium sm:px-4 sm:py-3">Serviço</th>
-              <th className="px-2 py-2.5 text-right font-medium sm:py-3">Postos</th>
-              <th className="hidden px-2 py-3 text-right font-medium sm:table-cell">
+              <th className="px-2 py-2.5 font-medium print:px-4 print:py-3 sm:px-4 sm:py-3">
+                Serviço
+              </th>
+              <th className="px-2 py-2.5 text-right font-medium print:py-3 sm:py-3">
+                Postos
+              </th>
+              <th className="print-show-cell hidden px-2 py-3 text-right font-medium print:table-cell sm:table-cell">
                 Unitário
               </th>
-              <th className="px-2 py-2.5 text-right font-medium whitespace-nowrap sm:px-4 sm:py-3">
+              <th className="px-2 py-2.5 text-right font-medium whitespace-nowrap print:px-4 print:py-3 sm:px-4 sm:py-3">
                 Mensal
               </th>
             </tr>
@@ -46,16 +50,16 @@ export function ProposalTable({
                   key={line.id}
                   className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}
                 >
-                  <td className="px-2 py-2.5 text-slate-700 sm:px-4 sm:py-3">
+                  <td className="px-2 py-2.5 text-slate-700 print:px-4 print:py-3 sm:px-4 sm:py-3">
                     {service.shortTitle}
                   </td>
-                  <td className="px-2 py-2.5 text-right font-medium text-slate-800 sm:py-3">
+                  <td className="px-2 py-2.5 text-right font-medium text-slate-800 print:py-3 sm:py-3">
                     {line.positions || 0}
                   </td>
-                  <td className="hidden px-2 py-3 text-right whitespace-nowrap text-slate-600 sm:table-cell">
+                  <td className="print-show-cell hidden px-2 py-3 text-right whitespace-nowrap text-slate-600 print:table-cell sm:table-cell">
                     {formatCurrency(line.unitValue)}
                   </td>
-                  <td className="px-2 py-2.5 text-right font-semibold whitespace-nowrap text-slate-800 sm:px-4 sm:py-3">
+                  <td className="px-2 py-2.5 text-right font-semibold whitespace-nowrap text-slate-800 print:px-4 print:py-3 sm:px-4 sm:py-3">
                     {formatCurrency(line.monthlyValue)}
                   </td>
                 </tr>
@@ -64,51 +68,51 @@ export function ProposalTable({
             <tr className="border-t border-slate-200 bg-slate-50">
               <td
                 colSpan={2}
-                className="px-2 py-2.5 font-medium text-slate-600 sm:hidden"
+                className="print-hide-cell px-2 py-2.5 font-medium text-slate-600 print:hidden sm:hidden"
               >
                 Investimento mensal
               </td>
               <td
                 colSpan={3}
-                className="hidden px-3 py-3 font-medium text-slate-600 sm:table-cell sm:px-4"
+                className="print-show-cell hidden px-3 py-3 font-medium text-slate-600 print:table-cell print:px-4 sm:table-cell sm:px-4"
               >
                 Investimento mensal
               </td>
-              <td className="px-2 py-2.5 text-right font-bold whitespace-nowrap text-bs-primary sm:px-4 sm:py-3">
+              <td className="px-2 py-2.5 text-right font-bold whitespace-nowrap text-bs-primary print:px-4 print:py-3 sm:px-4 sm:py-3">
                 {formatCurrency(monthlyValue)}
               </td>
             </tr>
             <tr className="bg-white">
               <td
                 colSpan={2}
-                className="px-2 py-2.5 font-medium text-slate-600 sm:hidden"
+                className="print-hide-cell px-2 py-2.5 font-medium text-slate-600 print:hidden sm:hidden"
               >
                 Investimento anual
               </td>
               <td
                 colSpan={3}
-                className="hidden px-3 py-3 font-medium text-slate-600 sm:table-cell sm:px-4"
+                className="print-show-cell hidden px-3 py-3 font-medium text-slate-600 print:table-cell print:px-4 sm:table-cell sm:px-4"
               >
                 Investimento anual
               </td>
-              <td className="px-2 py-2.5 text-right font-bold whitespace-nowrap text-bs-primary sm:px-4 sm:py-3">
+              <td className="px-2 py-2.5 text-right font-bold whitespace-nowrap text-bs-primary print:px-4 print:py-3 sm:px-4 sm:py-3">
                 {formatCurrency(annualValue)}
               </td>
             </tr>
             <tr className="bg-slate-50">
               <td
                 colSpan={2}
-                className="px-2 py-2.5 font-medium text-slate-600 sm:hidden"
+                className="print-hide-cell px-2 py-2.5 font-medium text-slate-600 print:hidden sm:hidden"
               >
                 Prazo do contrato
               </td>
               <td
                 colSpan={3}
-                className="hidden px-3 py-3 font-medium text-slate-600 sm:table-cell sm:px-4"
+                className="print-show-cell hidden px-3 py-3 font-medium text-slate-600 print:table-cell print:px-4 sm:table-cell sm:px-4"
               >
                 Prazo do contrato
               </td>
-              <td className="px-2 py-2.5 text-right font-semibold whitespace-nowrap text-slate-800 sm:px-4 sm:py-3">
+              <td className="px-2 py-2.5 text-right font-semibold whitespace-nowrap text-slate-800 print:px-4 print:py-3 sm:px-4 sm:py-3">
                 {contractTerm || "—"}
               </td>
             </tr>

@@ -17,30 +17,30 @@ export function ProposalHeader({
 }: ProposalHeaderProps) {
   return (
     <header className="proposal-header border-b border-slate-200 pb-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <div className="flex flex-col gap-4 print:flex-row print:items-start print:justify-between print:gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div className="flex min-w-0 items-center gap-4">
           <Image
             src={BRAND.logo}
             alt={BRAND.name}
             width={180}
             height={56}
-            className="h-12 w-auto max-w-full object-contain sm:h-14"
+            className="h-12 w-auto max-w-full object-contain print:h-14 sm:h-14"
             priority
           />
         </div>
 
-        <div className="min-w-0 text-left sm:text-right">
+        <div className="min-w-0 text-left print:text-right sm:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-bs-secondary">
             Documento comercial
           </p>
-          <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-bs-primary sm:text-2xl md:text-3xl">
+          <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-bs-primary print:text-3xl sm:text-2xl md:text-3xl">
             Proposta Comercial
           </h1>
           <p className="mt-1 text-sm text-slate-500">{BRAND.tagline}</p>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
+      <div className="proposal-meta-grid mt-6 grid gap-3 rounded-2xl bg-slate-50 p-4 print:grid-cols-2 sm:grid-cols-2">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Cliente
@@ -53,7 +53,7 @@ export function ProposalHeader({
             {city ? ` · ${city}` : ""}
           </p>
         </div>
-        <div className="sm:text-right">
+        <div className="proposal-meta-date print:text-right sm:text-right">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Data
           </p>

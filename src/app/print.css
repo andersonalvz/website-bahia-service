@@ -1,4 +1,7 @@
-/* Estilos exclusivos de impressão / Gerar PDF via navegador */
+/* Estilos exclusivos de impressão / Gerar PDF via navegador
+   Força layout A4 (desktop) mesmo quando a tela é mobile —
+   breakpoints sm/md/lg do Tailwind usam a largura do viewport e
+   no iPhone o print herdaria o layout estreito. */
 
 @media print {
   @page {
@@ -8,8 +11,16 @@
 
   html,
   body {
+    width: 210mm !important;
+    min-width: 210mm !important;
+    max-width: none !important;
     background: #ffffff !important;
     color: #0f172a !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-wrap: normal !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -24,26 +35,119 @@
 
   .proposal-layout {
     display: block !important;
+    width: 100% !important;
     max-width: none !important;
+    min-width: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
     gap: 0 !important;
   }
 
   .proposal-preview-shell {
+    width: 100% !important;
+    max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: visible !important;
   }
 
   .proposal-document {
     width: 100% !important;
     max-width: none !important;
+    min-width: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     background: #ffffff !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    transform: none !important;
+  }
+
+  /* —— Cabeçalho: sempre linha (desktop) —— */
+  .proposal-header > div:first-child {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 1.5rem !important;
+  }
+
+  .proposal-header > div:first-child > div:last-child {
+    text-align: right !important;
+  }
+
+  .proposal-header h1 {
+    font-size: 1.875rem !important;
+    line-height: 2.25rem !important;
+  }
+
+  .proposal-header img {
+    height: 3.5rem !important;
+  }
+
+  .proposal-header .proposal-meta-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .proposal-header .proposal-meta-date {
+    text-align: right !important;
+  }
+
+  /* —— Clientes —— */
+  .proposal-clients .clients-logos-frame {
+    padding: 6px !important;
+  }
+
+  .proposal-clients .clients-logos-frame > div {
+    height: 150mm !important;
+    max-height: none !important;
+    max-width: 100% !important;
+    aspect-ratio: auto !important;
+  }
+
+  /* —— Serviço: hero largo + 2 colunas —— */
+  .proposal-service .proposal-service-hero {
+    aspect-ratio: 21 / 9 !important;
+  }
+
+  .proposal-service .proposal-service-columns {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .proposal-service h2 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  /* —— Tabela financeira: colunas e rótulos desktop —— */
+  .proposal-table .table-scroll {
+    overflow: visible !important;
+  }
+
+  .proposal-table table {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 0.875rem !important;
+  }
+
+  .proposal-table th,
+  .proposal-table td {
+    padding: 0.75rem 1rem !important;
+  }
+
+  .proposal-table .print-show-cell {
+    display: table-cell !important;
+  }
+
+  .proposal-table .print-hide-cell {
+    display: none !important;
   }
 
   /* Página 1: cabeçalho + resumo + clientes */
@@ -60,23 +164,13 @@
     margin-bottom: 0 !important;
   }
 
-  .clients-logos-frame {
-    padding: 6px !important;
-  }
-
-  .clients-logos-frame > div {
-    height: 150mm !important;
-    max-width: 100% !important;
-  }
-
   /* Página 2: descrição do serviço */
   .proposal-service {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
   }
 
-  /* Página 3+: tabela financeira + condições comerciais
-     (espaço livre para crescer com mais serviços) */
+  /* Página 3+: tabela financeira + condições comerciais */
   .proposal-finance-page {
     break-before: always;
     page-break-before: always;
@@ -107,7 +201,7 @@
     page-break-inside: avoid;
   }
 
-  /* Página final exclusiva: SLA + contato */
+  /* Página final: SLA + contato */
   .proposal-sla-page {
     break-before: always;
     page-break-before: always;
