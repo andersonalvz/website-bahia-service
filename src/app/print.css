@@ -1,7 +1,7 @@
 /* Estilos exclusivos de impressão / Gerar PDF via navegador
-   Força layout A4 (desktop) mesmo quando a tela é mobile —
-   breakpoints sm/md/lg do Tailwind usam a largura do viewport e
-   no iPhone o print herdaria o layout estreito. */
+   Força layout A4 (desktop) mesmo quando a tela é mobile.
+   NÃO definir width/min-width em mm no html/body: no iOS isso
+   faz o Safari reduzir (scale) o conteúdo e o PDF fica compactado. */
 
 @media print {
   @page {
@@ -11,8 +11,8 @@
 
   html,
   body {
-    width: 210mm !important;
-    min-width: 210mm !important;
+    width: auto !important;
+    min-width: 0 !important;
     max-width: none !important;
     background: #ffffff !important;
     color: #0f172a !important;
@@ -110,9 +110,44 @@
     aspect-ratio: auto !important;
   }
 
-  /* —— Serviço: hero largo + 2 colunas —— */
+  .proposal-clients .clients-logos-frame img {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* —— Serviço: hero + foto print-safe (Safari/iPad) —— */
+  .proposal-service > div:first-child {
+    overflow: visible !important;
+  }
+
   .proposal-service .proposal-service-hero {
-    aspect-ratio: 21 / 9 !important;
+    position: relative !important;
+    aspect-ratio: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  /* next/image fill some vezes some no print do WebKit */
+  .proposal-service .service-hero-screen {
+    display: none !important;
+  }
+
+  .proposal-service .service-hero-print {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 75mm !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .proposal-service .proposal-service-hero-overlay {
+    position: absolute !important;
+    inset: 0 !important;
   }
 
   .proposal-service .proposal-service-columns {

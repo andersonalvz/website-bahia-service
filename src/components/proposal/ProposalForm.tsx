@@ -59,8 +59,16 @@ export function ProposalForm({
 
   return (
     <aside className="no-print flex w-full min-w-0 max-w-full flex-col lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:self-start">
-      <div className="w-full min-w-0 max-w-full overflow-x-hidden rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_10px_40px_rgba(27,54,93,0.06)] sm:p-6 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto">
-        <div className="mb-6 min-w-0">
+      <div className="flex w-full min-w-0 max-w-full flex-col overflow-x-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_40px_rgba(27,54,93,0.06)] lg:min-h-0 lg:max-h-[calc(100dvh-2rem)]">
+        <form
+          className="flex min-h-0 min-w-0 flex-1 flex-col"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onPrint();
+          }}
+        >
+          <div className="min-h-0 min-w-0 flex-1 space-y-6 overflow-x-hidden p-4 sm:p-6 lg:overflow-y-auto">
+        <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-bs-secondary">
             Gerador
           </p>
@@ -71,14 +79,6 @@ export function ProposalForm({
             Inclua um ou mais serviços e acompanhe o preview em tempo real.
           </p>
         </div>
-
-        <form
-          className="min-w-0 space-y-6"
-          onSubmit={(event) => {
-            event.preventDefault();
-            onPrint();
-          }}
-        >
           <fieldset className="min-w-0 space-y-4">
             <legend className="px-0 text-sm font-semibold text-bs-primary">
               Dados do cliente
@@ -278,14 +278,17 @@ export function ProposalForm({
               <TotalCard label="Valor anual" value={totals.annualValue} />
             </div>
           </div>
+          </div>
 
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-bs-primary px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-bs-primary/20 transition hover:bg-bs-primary/95 focus:outline-none focus:ring-2 focus:ring-bs-secondary focus:ring-offset-2"
-          >
-            <PrinterIcon />
-            Gerar PDF
-          </button>
+          <div className="shrink-0 border-t border-slate-100 bg-white p-4 sm:p-6">
+            <button
+              type="submit"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-bs-primary px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-bs-primary/20 transition hover:bg-bs-primary/95 focus:outline-none focus:ring-2 focus:ring-bs-secondary focus:ring-offset-2"
+            >
+              <PrinterIcon />
+              Gerar PDF
+            </button>
+          </div>
         </form>
       </div>
     </aside>

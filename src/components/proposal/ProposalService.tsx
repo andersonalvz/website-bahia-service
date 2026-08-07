@@ -24,16 +24,24 @@ export function ProposalService({
   return (
     <section className="proposal-service space-y-5">
       <div className="overflow-hidden rounded-2xl">
-        <div className="proposal-service-hero relative aspect-[4/3] w-full bg-slate-100 print:aspect-[21/9] sm:aspect-[16/9] lg:aspect-[21/9]">
+        <div className="proposal-service-hero relative aspect-[4/3] w-full bg-slate-100 print:aspect-auto sm:aspect-[16/9] lg:aspect-[21/9]">
+          {/* Tela: next/image fill */}
           <Image
             src={image}
             alt={title}
             fill
             quality={90}
-            className="object-cover object-center"
+            className="service-hero-screen object-cover object-center print:hidden"
             sizes="(max-width: 768px) 100vw, 700px"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-bs-primary/70 via-bs-primary/20 to-transparent" />
+          {/* Print: img em fluxo — Safari/iPad não imprime fill absoluto de forma confiável */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image}
+            alt={title}
+            className="service-hero-print hidden h-auto w-full object-cover object-center print:block"
+          />
+          <div className="proposal-service-hero-overlay absolute inset-0 bg-gradient-to-t from-bs-primary/70 via-bs-primary/20 to-transparent" />
           <div className="absolute bottom-3 left-3 right-3 flex items-end gap-2.5 text-white print:bottom-4 print:left-4 print:right-4 print:gap-3 sm:bottom-4 sm:left-4 sm:right-4 sm:gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm print:h-10 print:w-10 sm:h-10 sm:w-10">
               <ServiceIcon name={icon} className="h-5 w-5" />
