@@ -288,6 +288,14 @@ export function ProposalForm({
               <PrinterIcon />
               Gerar PDF
             </button>
+            <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-500">
+              No diálogo de impressão, desmarque{" "}
+              <span className="font-medium text-slate-600">
+                Cabeçalhos e rodapés
+              </span>{" "}
+              para remover data, hora e URL. O rodapé deve ficar só com o número
+              da página (ex.: 1/5), quando o navegador permitir.
+            </p>
           </div>
         </form>
       </div>

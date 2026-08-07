@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { BRAND } from "@/constants/brand";
 import { formatDisplayDate } from "@/lib/dates";
 
@@ -19,13 +18,13 @@ export function ProposalHeader({
     <header className="proposal-header border-b border-slate-200 pb-6">
       <div className="flex flex-col gap-4 print:flex-row print:items-start print:justify-between print:gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div className="flex min-w-0 items-center gap-4">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={BRAND.logo}
             alt={BRAND.name}
             width={180}
             height={56}
-            className="h-12 w-auto max-w-full object-contain print:h-14 sm:h-14"
-            priority
+            className="h-12 w-auto max-w-full object-contain sm:h-14"
           />
         </div>
 
