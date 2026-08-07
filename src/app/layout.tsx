@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Sora } from "next/font/google";
 import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 import { BRAND } from "@/constants/brand";
@@ -16,6 +16,11 @@ const sora = Sora({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#1B365D",
+  colorScheme: "light",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(BRAND.url),
   title: {
@@ -23,7 +28,7 @@ export const metadata: Metadata = {
     template: `%s | ${BRAND.name}`,
   },
   description:
-    "Bahia Service — excelência em facilities e terceirização de serviços: portaria, limpeza, recepção, jardinagem, manutenção e apoio administrativo em Salvador e em toda a Bahia.",
+    "Bahia Service — excelência em facilities e terceirização de serviços: limpeza e conservação, jardinagem e portaria e controle de acesso em Salvador e em toda a Bahia.",
   keywords: [
     "Bahia Service",
     "terceirização",
@@ -37,6 +42,13 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: BRAND.name }],
   creator: "Anderson Alves | Techiando",
+  applicationName: BRAND.name,
+  manifest: "/site.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: BRAND.name,
+    statusBarStyle: "default",
+  },
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -66,8 +78,30 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: [{ url: "/favicon.ico" }, { url: "/icons/icon-192.png", sizes: "192x192" }],
-    apple: "/icons/apple-touch-icon.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "android-chrome",
+        url: "/android-chrome-192x192.png",
+        sizes: "192x192",
+      },
+      {
+        rel: "android-chrome",
+        url: "/android-chrome-512x512.png",
+        sizes: "512x512",
+      },
+    ],
+  },
+  other: {
+    "msapplication-TileColor": "#1B365D",
   },
 };
 
