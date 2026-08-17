@@ -4,7 +4,7 @@ export const COMMERCIAL_CONDITIONS = [
   "Estão inclusos no valor apresentado o fornecimento de uniformes e Equipamentos de Proteção Individual (EPIs) necessários à execução das atividades.",
   "Equipamentos de comunicação, controle de acesso ou outros dispositivos específicos da contratante não estão inclusos nesta proposta, salvo quando expressamente previstos em contrato.",
   "As despesas com transporte e alimentação dos colaboradores estão integralmente contempladas nos valores apresentados.",
-  "O faturamento será realizado mediante emissão de Nota Fiscal no dia 01 de cada mês, com prazo de pagamento de 45 (quarenta e cinco) dias.",
+  "O Faturamento será realizado mediante emissão de Nota Fiscal com data e prazo de pagamento a combinar.",
   "A medição dos serviços será realizada entre os dias 25 e 30 de cada mês, podendo haver descontos proporcionais em casos de faltas injustificadas ou serviços não executados.",
   "A Bahia Service será responsável pela gestão de ponto e acompanhamento operacional dos colaboradores alocados no contrato.",
   "O contrato terá vigência inicial de 12 (doze) meses, podendo ser rescindido por qualquer das partes mediante aviso prévio de 30 (trinta) dias, sem incidência de multa rescisória, observadas as condições contratuais.",

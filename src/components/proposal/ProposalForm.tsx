@@ -1,6 +1,5 @@
 "use client";
 
-import { CONTRACT_TERM_OPTIONS } from "@/constants/commercial";
 import { createEmptyServiceLine } from "@/data/defaults";
 import { SERVICE_OPTIONS } from "@/data/services";
 import { formatCurrency } from "@/lib/currency";
@@ -248,27 +247,6 @@ export function ProposalForm({
               ))}
             </div>
 
-            <div className="space-y-1.5">
-              <label
-                htmlFor="contractTerm"
-                className="text-sm font-medium text-slate-700"
-              >
-                Prazo do contrato <span className="text-bs-secondary">*</span>
-              </label>
-              <select
-                id="contractTerm"
-                value={data.contractTerm}
-                onChange={(event) => onChange("contractTerm", event.target.value)}
-                className="field-input"
-                required
-              >
-                {CONTRACT_TERM_OPTIONS.map((term) => (
-                  <option key={term} value={term}>
-                    {term}
-                  </option>
-                ))}
-              </select>
-            </div>
           </fieldset>
 
           <div className="rounded-2xl border border-bs-primary/10 bg-gradient-to-br from-slate-50 to-blue-50/60 p-4">
@@ -277,7 +255,6 @@ export function ProposalForm({
             </p>
             <div className="mt-3 grid min-w-0 grid-cols-1 gap-3">
               <TotalCard label="Valor mensal" value={totals.monthlyValue} />
-              <TotalCard label="Valor anual" value={totals.annualValue} />
             </div>
           </div>
           </div>

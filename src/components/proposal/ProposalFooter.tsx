@@ -35,9 +35,13 @@ export function ProposalFooter() {
 
       <section className="proposal-contact rounded-2xl bg-bs-primary px-5 py-4 text-white">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bs-accent">
-          Contato
+          CONTATO COMERCIAL
         </p>
         <div className="contact-details mt-3 space-y-2 text-sm">
+          <p className="break-words">
+            <span className="text-white/70">Responsável: </span>
+            Robson Soares
+          </p>
           <p className="break-words">
             <span className="text-white/70">Telefones: </span>
             {BRAND.contact.phones.join(" · ")}
@@ -45,6 +49,17 @@ export function ProposalFooter() {
           <p className="break-all">
             <span className="text-white/70">E-mail: </span>
             {BRAND.contact.email}
+          </p>
+          <p className="break-words">
+            <span className="text-white/70">Instagram: </span>
+            <a
+              href="https://instagram.com/bahiaservice.ofc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2"
+            >
+              @bahiaservice.ofc
+            </a>
           </p>
           <p className="break-words">
             <span className="text-white/70">Endereço: </span>

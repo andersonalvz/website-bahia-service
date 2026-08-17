@@ -5,15 +5,11 @@ import type { ProposalLineTotal } from "@/types/proposal";
 interface ProposalTableProps {
   lines: ProposalLineTotal[];
   monthlyValue: number;
-  annualValue: number;
-  contractTerm: string;
 }
 
 export function ProposalTable({
   lines,
   monthlyValue,
-  annualValue,
-  contractTerm,
 }: ProposalTableProps) {
   return (
     <section className="proposal-table">
@@ -80,40 +76,6 @@ export function ProposalTable({
               </td>
               <td className="px-2 py-2.5 text-right font-bold whitespace-nowrap text-bs-primary print:px-4 print:py-3 sm:px-4 sm:py-3">
                 {formatCurrency(monthlyValue)}
-              </td>
-            </tr>
-            <tr className="bg-white">
-              <td
-                colSpan={2}
-                className="print-hide-cell px-2 py-2.5 font-medium text-slate-600 print:hidden sm:hidden"
-              >
-                Investimento anual
-              </td>
-              <td
-                colSpan={3}
-                className="print-show-cell hidden px-3 py-3 font-medium text-slate-600 print:table-cell print:px-4 sm:table-cell sm:px-4"
-              >
-                Investimento anual
-              </td>
-              <td className="px-2 py-2.5 text-right font-bold whitespace-nowrap text-bs-primary print:px-4 print:py-3 sm:px-4 sm:py-3">
-                {formatCurrency(annualValue)}
-              </td>
-            </tr>
-            <tr className="bg-slate-50">
-              <td
-                colSpan={2}
-                className="print-hide-cell px-2 py-2.5 font-medium text-slate-600 print:hidden sm:hidden"
-              >
-                Prazo do contrato
-              </td>
-              <td
-                colSpan={3}
-                className="print-show-cell hidden px-3 py-3 font-medium text-slate-600 print:table-cell print:px-4 sm:table-cell sm:px-4"
-              >
-                Prazo do contrato
-              </td>
-              <td className="px-2 py-2.5 text-right font-semibold whitespace-nowrap text-slate-800 print:px-4 print:py-3 sm:px-4 sm:py-3">
-                {contractTerm || "—"}
               </td>
             </tr>
           </tbody>

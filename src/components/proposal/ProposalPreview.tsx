@@ -67,8 +67,6 @@ export function ProposalPreview({ data, totals }: ProposalPreviewProps) {
           <ProposalTable
             lines={totals.lines}
             monthlyValue={totals.monthlyValue}
-            annualValue={totals.annualValue}
-            contractTerm={data.contractTerm}
           />
           <ProposalConditions />
         </section>
