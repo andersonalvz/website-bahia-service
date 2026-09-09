@@ -152,7 +152,7 @@ function buildPrintDocumentCss(): string {
       background: #fff;
       color: #0f172a;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      font-size: 12px;
+      font-size: 13px;
       line-height: 1.45;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -219,7 +219,7 @@ function buildPrintDocumentCss(): string {
     }
     .proposal-header > div:first-child > div:last-child p:last-child {
       margin: 2px 0 0;
-      font-size: 11px;
+      font-size: 12px;
       color: #64748b;
     }
 
@@ -264,7 +264,7 @@ function buildPrintDocumentCss(): string {
     .proposal-summary p {
       margin: 0;
       color: #475569;
-      font-size: 12px;
+      font-size: 13px;
     }
 
     /* —— Clientes —— */
@@ -281,7 +281,7 @@ function buildPrintDocumentCss(): string {
     .proposal-clients > p {
       margin: 0 0 8px;
       color: #475569;
-      font-size: 12px;
+      font-size: 13px;
     }
     .clients-logos-frame {
       border: 1px solid #e2e8f0;
@@ -346,14 +346,12 @@ function buildPrintDocumentCss(): string {
     .proposal-service-description p {
       margin: 0 0 8px;
       color: #475569;
-      font-size: 12px;
+      font-size: 13px;
     }
     .proposal-service-description p:last-child { margin-bottom: 0; }
 
     /* —— Financeiro —— */
     .proposal-finance-page {
-      break-before: page;
-      page-break-before: always;
       margin: 0;
     }
     .proposal-table { margin-bottom: 14px; break-inside: avoid; }
@@ -365,13 +363,13 @@ function buildPrintDocumentCss(): string {
     .proposal-table > p {
       margin: 0 0 8px;
       color: #64748b;
-      font-size: 11px;
+      font-size: 12px;
     }
     .table-scroll { overflow: visible; }
     .proposal-table table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11.5px;
+      font-size: 12.5px;
     }
     .proposal-table th {
       background: #1b365d;
@@ -411,14 +409,12 @@ function buildPrintDocumentCss(): string {
       gap: 10px;
       margin-bottom: 6px;
       color: #475569;
-      font-size: 11.5px;
+      font-size: 12.5px;
       break-inside: avoid;
     }
 
     /* —— SLA —— */
     .proposal-sla-page {
-      break-before: page;
-      page-break-before: always;
       margin: 0;
     }
     .proposal-sla {
@@ -440,7 +436,7 @@ function buildPrintDocumentCss(): string {
       border-radius: 8px;
       break-inside: avoid;
     }
-    .sla-item p { margin: 0; font-size: 11.5px; color: #475569; }
+    .sla-item p { margin: 0; font-size: 12.5px; color: #475569; }
     .sla-item p:first-child {
       font-weight: 600;
       color: #1b365d;
@@ -465,7 +461,7 @@ function buildPrintDocumentCss(): string {
       margin-top: 8px;
       display: grid;
       gap: 3px;
-      font-size: 11.5px;
+      font-size: 12.5px;
     }
     .contact-details p { margin: 0; }
 
